@@ -10,6 +10,7 @@
     boost::program_options::options_description desc;
     boost::program_options::positional_options_description p;
 
+  private:
     std::string format;
     std::vector<std::string> input_files;
 
@@ -17,6 +18,14 @@
     opts();
 
     bool parse(int argc, const char* argv[]);
+
+    const std::string &getFormat() const {
+      return format;
+    }
+
+    const std::vector<std::string> &getInput_files() const {
+      return input_files;
+    }
 
   };
 
