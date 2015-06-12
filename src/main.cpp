@@ -48,7 +48,7 @@ int main(int argc, const char* argv[]) {
         rdfParser.read_triplets(resource_map, ontology_map, resource_id, ontology_id, output_edges);
         std::cout << path << " processed.\n";
       } else if (fs::is_directory(path)) { // iterate through the folder and read every file in it
-        for (fs::directory_iterator it(path); it != fs::end(it); it++) {
+        for (fs::directory_iterator it(path); it != fs::directory_iterator(); it++) {
           if (fs::is_regular_file(it->status())) {
             rdf_parser rdfParser(it->path().string());
             rdfParser.read_triplets(resource_map, ontology_map, resource_id, ontology_id, output_edges);
