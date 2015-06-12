@@ -14,7 +14,9 @@
         ("input-file", boost::program_options::value<std::vector<std::string> >()->required(),
          "RDF files contains infobox property")
         ("format,f", boost::program_options::value<std::string>(),
-         "output format, can be graphml or compact, the default is compact");
+         "output format, can be graphml or edgelist, the default is edgelist")
+        ("output,o", boost::program_options::value<std::string>(),
+         "prefix of output file");
   }
 
   bool opts::parse(int argc, const char *argv[]) {
@@ -36,6 +38,13 @@
       }
       if (vm.count("format")) {
         format = vm["format"].as<std::string>();
+      } else {
+        format = "edgelist";
+      }
+      if (vm.count("output")) {
+        output_prefix = vm["output"].as<std::string>();
+      } else {
+        output_prefix = "out";
       }
     } catch (std::exception& err) {
       std::cout << err.what() << std::endl;
