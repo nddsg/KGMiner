@@ -13,6 +13,7 @@
   private:
     std::string format;
     std::vector<std::string> input_files;
+    std::string output_prefix;
 
   public:
     opts();
@@ -25,6 +26,10 @@
 
     const std::vector<std::string> &getInput_files() const {
       return input_files;
+    }
+
+    const std::string &getOutput_prefix() const {
+      return output_prefix;
     }
 
   };

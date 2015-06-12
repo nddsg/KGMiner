@@ -14,15 +14,25 @@
 class rdf_parser {
 
   rdf::reader rdf_reader;
-  static bool is_resource(std::string& str);
+
+  static inline bool is_resource(std::string &str);
+
+  static inline bool is_ontology(std::string &str);
+
+  static inline bool is_isa(std::string &str);
+
+  unsigned int get_mapped_id(boost::unordered_map<std::string, unsigned int> &resource_map,
+                             boost::unordered_map<std::string, unsigned int> &ontology_map,
+                             unsigned int &mapped_id, std::string str, bool is_predicate = false);
 
 public:
 
   rdf_parser(std::string file_path);
 
   void read_triplets(boost::unordered_map<std::string, unsigned int> &resource_map,
-                                 boost::unordered_map<std::string, unsigned int> &ontology_map, unsigned int &mapped_id,
-                                 std::vector<std::string> output_edges);
+                     boost::unordered_map<std::string, unsigned int> &ontology_map,
+                     unsigned int &resource_id, unsigned int &ontology_id,
+                     std::vector<std::string> &output_edges);
 
 };
 
