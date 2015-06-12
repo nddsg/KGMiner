@@ -9,4 +9,4 @@ link_directories(/usr/lib /usr/local/lib)
 
 set(SOURCE_FILES src/main.cpp)
 add_executable(GBpedia ${SOURCE_FILES} src/opts.cpp src/opts.h src/rdf_parser.cpp src/rdf_parser.h)
-target_link_libraries(GBpedia /usr/local/lib/librdf++.dylib libboost_program_options.a)
+target_link_libraries(GBpedia /usr/local/lib/librdf++.dylib libboost_program_options.a boost_system boost_filesystem)
