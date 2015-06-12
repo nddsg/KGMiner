@@ -70,10 +70,10 @@ int main(int argc, const char* argv[]) {
   }
 
   std::cout << "writing " << options.getOutput_prefix() << ".nodes ...\n";
-  write_map(resource_map, options.getOutput_prefix() + ".nodes", sep="\t");
+  write_map(resource_map, options.getOutput_prefix() + ".nodes", "\t");
 
   std::cout << "writing " << options.getOutput_prefix() << ".edgetypes ...\n";
-  write_map(ontology_map, options.getOutput_prefix() + ".edgetypes", sep="\t");
+  write_map(ontology_map, options.getOutput_prefix() + ".edgetypes", "\t");
 
   // Deduplicate edges
   std::cout << "dedpulicating edges, this may take a while ...\n";
