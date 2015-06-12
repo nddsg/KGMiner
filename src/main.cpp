@@ -39,11 +39,9 @@ int main(int argc, const char* argv[]) {
 
   try{
     for(size_t i = 0; i < options.getInput_files().size(); i++) {
-      std::cout << "resouce map size " << resource_map.size() << " ontology size " << ontology_map.size() <<
-      " resource_id " <<
-      resource_id << std::endl;
       rdf_parser rdfParser(options.getInput_files().at(i));
       rdfParser.read_triplets(resource_map, ontology_map, resource_id, ontology_id, output_edges);
+      std::cout << options.getInput_files().at(i) << " processed.\n";
     }
 
   }catch (std::invalid_argument error) {
@@ -51,9 +49,24 @@ int main(int argc, const char* argv[]) {
     return -1;
   }
 
+  std::cout << "writing " << options.getOutput_prefix() << ".nodes ...\n";
   write_map(resource_map, options.getOutput_prefix() + ".nodes");
+
+  std::cout << "writing " << options.getOutput_prefix() << ".edgetypes ...\n";
   write_map(ontology_map, options.getOutput_prefix() + ".edgetypes");
+
+  // Deduplicate edges
+  std::cout << "dedpulicating edges, this may take a while ...\n";
+  sort(output_edges.begin(), output_edges.end());
+  output_edges.erase(unique(output_edges.begin(), output_edges.end()), output_edges.end());
+
+  std::cout << "writing " << options.getOutput_prefix() << ".edgelist ...\n";
   write_vector(output_edges, options.getOutput_prefix() + ".edgelist");
+
+  std::cout << "Job done!\nStatistics:\n"
+  << "\t#Nodes: " << resource_id << std::endl
+  << "\t#EdgeTypes: " << ontology_id << std::endl
+  << "\t#Edges: " << output_edges.size() << std::endl;
 
   return 0;
 }

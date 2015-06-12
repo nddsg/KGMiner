@@ -87,12 +87,10 @@ void rdf_parser::read_triplets(boost::unordered_map<std::string, unsigned int> &
           dst = get_mapped_id(resource_map, ontology_map, resource_id, triplet->object->string, false),
           rel = get_mapped_id(resource_map, ontology_map, ontology_id, triplet->predicate->string, true);
 
-      if (src != 0 && dst != 0 && rel != 0)
-
+      if (src != 0 && dst != 0 && rel != 0) {
         ss << src << "," << dst << "," << rel;
-
-      std::cout << ss.str();
-      output_edges.push_back(ss.str());
+        output_edges.push_back(ss.str());
+      }
     } catch (std::invalid_argument &err) { }
     catch (std::domain_error &err) {
       std::cout << err.what();
