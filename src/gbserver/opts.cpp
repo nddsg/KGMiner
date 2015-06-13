@@ -19,6 +19,7 @@
          "NodeList filepath")
         ("type,t", boost::program_options::value<std::string>()->required(),
          "EdgeTypeList filepath")
+        ("directed,d", "Directed graph")
         ("port,p", boost::program_options::value<int>(),
          port_desc.c_str());
   }
@@ -49,6 +50,7 @@
       if (vm.count("port")) {
         port = vm["port"].as<int>();
       }
+      is_directed = vm.count("directed") == 1;
     } catch (std::exception& err) {
       std::cout << err.what() << std::endl;
       return false;

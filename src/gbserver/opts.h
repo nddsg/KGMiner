@@ -14,6 +14,7 @@
     std::string edge_filepath;
     std::string type_filepath;
     int port = 8964;
+    bool is_directed;
 
   public:
     opts();
@@ -35,6 +36,10 @@
 
     int getPort() const {
       return port;
+    }
+
+    bool getIs_directed() const {
+      return is_directed;
     }
 
   };
