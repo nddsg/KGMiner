@@ -33,7 +33,7 @@ public:
       fin.get(); // remove separator
       fin >> val;
 
-      if (id > node_map.size()) { /* Enlarge node_map so it can contain certain number of nodes */
+      if (id >= node_map.size()) { /* Enlarge node_map so it can contain certain number of nodes */
         node_map.resize(id + 1u, "");
       }
       node_map[id] = val;
