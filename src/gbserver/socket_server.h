@@ -42,7 +42,7 @@ public:
     local::stream_protocol::endpoint ep(socket_name);
     local::stream_protocol::acceptor acceptor(socket_io_service, ep);
 
-    while(true) {
+    while(true) { //TODO: Throw Broken pipe error when all workers are busy and a lot of requests are coming.
       local::stream_protocol::socket *socket = new local::stream_protocol::socket(socket_io_service);
       acceptor.accept(*socket);
       std::cout << "get a connection!\n";
