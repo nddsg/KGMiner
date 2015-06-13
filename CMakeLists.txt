@@ -12,5 +12,5 @@ set(SOURCE_FILES src/parser/main.cpp)
 add_executable(gbparser src/parser/main.cpp src/parser/opts.cpp src/parser/opts.h src/parser/rdf_parser.cpp src/parser/rdf_parser.h)
 target_link_libraries(gbparser /usr/local/lib/librdf++.dylib libboost_program_options.a boost_system boost_filesystem)
 
-add_executable(gbserver src/gbserver/main.cpp src/gbserver/opts.h src/gbserver/opts.cpp src/gbserver/node_loader.h src/gbserver/edge_loader.h)
+add_executable(gbserver src/gbserver/main.cpp src/gbserver/opts.h src/gbserver/opts.cpp src/gbserver/node_loader.h src/gbserver/edge_loader.h src/gbserver/type_loader.h)
 target_link_libraries(gbserver libboost_program_options.a boost_system boost_filesystem)
