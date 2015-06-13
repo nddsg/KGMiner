@@ -6,8 +6,7 @@
 #include "node_loader.h"
 #include "type_loader.h"
 #include "edge_loader.h"
-
-#include <iostream>
+#include "socket_server.h"
 
 
 int main(int argc, const char *argv[]) {
@@ -37,6 +36,10 @@ int main(int argc, const char *argv[]) {
     << " and edgelist (" << edges.getMax_rel() <<")";
   }
 
+  socket_server server;
+  server.start("/tmp/gbserver");
+
+  //TODO: Die gracefully.
 
   return 0;
 }
