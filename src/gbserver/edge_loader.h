@@ -5,42 +5,18 @@
 #ifndef GBPEDIA_EDGE_LOADER_H
 #define GBPEDIA_EDGE_LOADER_H
 
+#include "edge_list.h"
 
 #include <vector>
 #include <fstream>
 #include <algorithm>
 #include <utility>
-#include <boost/unordered_map.hpp>
 
 class edge_loader {
 
-public:
-
 private:
-  
-  class edge_type {
-    std::set< std::pair<uint, uint> > forward; /* Directed edge*/
-    std::set< std::pair<uint, uint> > backward; /* Reversed edge for mimicking undirected graph */
-  public:
 
-    edge_type() : forward(std::set< std::pair<uint, uint> >()),
-                  backward(std::set< std::pair<uint, uint> >()){}
-
-    inline void connect_to(uint target, uint rel) {
-      forward.insert(std::pair<uint, uint>(target, rel));
-    }
-    inline void connected_by(uint source, uint rel) {
-      backward.insert(std::pair<uint, uint>(source, rel));
-    }
-    inline void disconnect_to(uint target, uint rel) {
-      forward.erase(std::pair<uint, uint>(target, rel));
-    }
-    inline void disconnected_by(uint source, uint rel) {
-      backward.erase(std::pair<uint, uint>(source, rel));
-    }
-  };
-
-  std::vector<edge_type> edge_map;
+  std::vector<edge_list> edge_map;
   uint max_id, max_rel, nedges;
 
 public:
@@ -55,7 +31,7 @@ public:
       fin >> src >> sep >> dst >> sep >> rel;
 
       if (std::max(src, dst) >= edge_map.size()) { /* Enlarge edge_map so it can contain certain number of nodes */
-        edge_map.resize(std::max(src, dst) + 1u, edge_type());
+        edge_map.resize(std::max(src, dst) + 1u, edge_list());
       }
       
       /* Log forward edge */
@@ -71,6 +47,10 @@ public:
     }
 
     fin.close();
+  }
+
+  edge_list& get_edges(unsigned int src) {
+    return edge_map.at(src);
   }
 
   unsigned int getMax_id() const {

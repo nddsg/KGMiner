@@ -5,14 +5,24 @@
 #ifndef GBPEDIA_SOCKET_SERVER_H
 #define GBPEDIA_SOCKET_SERVER_H
 
+#include "graph.h"
+
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 
 namespace local = boost::asio::local;
 
-void worker(local::stream_protocol::socket *socket) {
+void worker(local::stream_protocol::socket *socket, graph<std::string, std::string>& g) {
   std::cout << "hello socket\n";
+  std::vector< std::vector<unsigned int> > paths = g.dfs(1, 10, 3);
+  std::cout << "find " << paths.size() << " paths\n";
+  for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
+    for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+      std::cout << *itt << " ";
+    }
+    std::cout << "\n";
+  }
   boost::asio::write(*socket, boost::asio::buffer("hey socket!\n"));
   socket->close();
   delete socket;
@@ -36,7 +46,7 @@ public:
     std::cout << threadpool.size() << " threads are created\n";
   }
 
-  void start(std::string socket_name) {
+  void start(std::string socket_name, graph<std::string, std::string>& g) {
     boost::asio::io_service socket_io_service;
     ::unlink(socket_name.c_str());
     local::stream_protocol::endpoint ep(socket_name);
@@ -46,7 +56,7 @@ public:
       local::stream_protocol::socket *socket = new local::stream_protocol::socket(socket_io_service);
       acceptor.accept(*socket);
       std::cout << "get a connection!\n";
-      worker_io_service.post(boost::bind(worker,socket));
+      worker_io_service.post(boost::bind(worker, socket, g));
       std::cout << "job posted!\n";
     }
   }
