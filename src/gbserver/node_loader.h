@@ -44,7 +44,11 @@ public:
     fin.close();
   };
 
-  unsigned int getMax_id() const {
+  bool exists(unsigned int id) noexcept {
+    return id <= max_id;
+  }
+
+  unsigned int getMax_id() const noexcept {
     return max_id;
   }
 

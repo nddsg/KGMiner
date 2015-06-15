@@ -36,8 +36,12 @@ int main(int argc, const char *argv[]) {
     << " and edgelist (" << edges.getMax_rel() <<")";
   }
 
+  graph<std::string, std::string> g(nodes, edges, edgetypes);
+
+  std::cout << "Graph constructed\n";
+
   socket_server server;
-  server.start("/tmp/gbserver");
+  server.start("/tmp/gbserver", g);
 
   //TODO: Die gracefully.
 
