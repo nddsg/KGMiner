@@ -43,7 +43,7 @@ class graph {
     edge_list &edges = edges_ptr->get_edges(src);
     for(auto it = edges.get_forward().cbegin();
         it != edges.get_forward().cend(); ++it) {
-        if (visited.find(it->first) == visited.end()) { // never visited
+        if (visited.find(it->first) == visited.end() || it->first == dst) { // never visited
           tmp_path.push_back(it->first);
           dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
