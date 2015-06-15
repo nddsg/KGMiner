@@ -12,7 +12,9 @@
 int main(int argc, const char *argv[]) {
 
   opts options;
-  options.parse(argc, argv);
+  if (!options.parse(argc, argv)) {
+    return -1;
+  }
 
   node_loader<std::string> nodes(options.getNode_filepath());
 
