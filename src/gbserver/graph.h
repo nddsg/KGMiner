@@ -54,7 +54,7 @@ class graph {
     if (!is_directed) {
       for(auto it = edges.get_backward().cend();
           it != edges.get_backward().cend(); ++it) {
-        if (visited.find(it->first) == visited.end()) {
+        if (visited.find(it->first) == visited.end() || it->first == dst) {
           tmp_path.push_back(it->first);
           dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
