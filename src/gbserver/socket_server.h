@@ -58,6 +58,30 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = error.what();
     }
 
+  } else if (commands.at(0) == "in_neighbor") {
+    try {
+      std::ostringstream oss;
+      std::vector<unsigned int> neighbors = g.get_in_edges((unsigned int)stoi(commands.at(1)));
+      for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
+        oss << *it << ",";
+      }
+      oss << "\n";
+      return_string = oss.str();
+    } catch(std::exception error) {
+      return_string = error.what();
+    }
+  } else if (commands.at(0) == "out_neighbor") {
+    try {
+      std::ostringstream oss;
+      std::vector<unsigned int> neighbors = g.get_out_edges((unsigned int)stoi(commands.at(1)));
+      for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
+        oss << *it << ",";
+      }
+      oss << "\n";
+      return_string = oss.str();
+    } catch(std::exception error) {
+      return_string = error.what();
+    }
   } else {
     return_string = "Unsupported command\n";
   }

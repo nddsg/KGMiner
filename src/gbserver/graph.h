@@ -22,8 +22,14 @@ class graph {
   std::shared_ptr<edge_loader> edges_ptr;
   std::shared_ptr< type_loader<edge_type> > edgetypes_ptr;
 
+  void is_node_valid(unsigned int id) {
+    if (!nodes_ptr->exists(id)) {
+      throw std::runtime_error("Nodes " + std::to_string(id) + " does not exist.");
+    }
+  }
+
   /**
-   * Directed dfs helper
+   * homogeneous dfs helper
    */
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
@@ -74,14 +80,36 @@ public:
       edges_ptr(&edges),
       edgetypes_ptr(&edgetypes) {};
 
+  std::vector<unsigned int> get_out_edges(unsigned src) {
+    is_node_valid(src);
+    std::vector<unsigned int> result;
+    edge_list &edges = edges_ptr->get_edges(src);
+    for(auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+      result.push_back(it->first);
+    }
+    return(result);
+
+  }
+
+  std::vector<unsigned int> get_in_edges(unsigned src) {
+    is_node_valid(src);
+    std::vector<unsigned int> result;
+    edge_list &edges = edges_ptr->get_edges(src);
+    for(auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
+      result.push_back(it->first);
+    }
+    return(result);
+  }
+
+  /**
+   * Homogeneous DFS algorithm
+   */
   std::vector< std::vector<unsigned int> > dfs(unsigned int src,
                                                unsigned int dst,
                                                unsigned int depth = 4,
                                                bool is_directed = true){
-    if (!nodes_ptr->exists(src) || !nodes_ptr->exists(dst)) {
-      throw std::runtime_error("Nodes " + std::to_string(src) + " or " +
-                               std::to_string(dst) + " does not exist.");
-    }
+    is_node_valid(src);
+    is_node_valid(dst);
 
     std::vector< std::vector<unsigned int> > result;
 
