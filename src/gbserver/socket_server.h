@@ -18,7 +18,6 @@
 namespace local = boost::asio::local;
 
 void worker(local::stream_protocol::socket *socket, graph<std::string, std::string>& g) {
-  std::cout << "hello socket\n";
   boost::array<char, 1024> buf;
   boost::system::error_code error;
   size_t len = boost::asio::read(*socket, boost::asio::buffer(buf), error);
@@ -41,19 +40,20 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     return_string = "No command provided\n";
   }else if (commands.at(0) == "path") {
     try{
+      std::ostringstream oss;
       std::vector< std::vector<unsigned int> > paths = g.dfs((unsigned int)stoi(commands.at(1)),
                                                              (unsigned int)stoi(commands.at(2)),
                                                              (unsigned int)stoi(commands.at(3)),
                                                              commands.size() == 4 || (commands.at(4) == "true" ||
                                                                  commands.at(4) == "TRUE" || commands.at(4) == "T"));
-      std::cout << "find " << paths.size() << " paths\n";
+      oss << "find " << paths.size() << " paths\n";
       for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
         for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-          std::cout << *itt << "--";
+          oss << *itt << "--";
         }
-        std::cout << "\n";
+        oss << "\n";
       }
-      return_string = "Supported command\n";
+      return_string = oss.str();
     } catch(std::exception error) {
       return_string = error.what();
     }
@@ -95,9 +95,7 @@ public:
     while(true) { //TODO: Throw Broken pipe error when all workers are busy and a lot of requests are coming.
       local::stream_protocol::socket *socket = new local::stream_protocol::socket(socket_io_service);
       acceptor.accept(*socket);
-      std::cout << "get a connection!\n";
       worker_io_service.post(boost::bind(worker, socket, g));
-      std::cout << "job posted!\n";
     }
   }
 
