@@ -37,6 +37,9 @@ unsigned int rdf_parser::get_mapped_id(boost::unordered_map<std::string, unsigne
     }
     if (is_ontology(str)) {
       str = str.substr(PREFIX_MAGIC);
+      if (str.length() == 0) {
+        str = "."; // Fix parsing problem when URI is "....ontology/."
+      }
       if (ontology_map.find(str) == ontology_map.end()) {
         ontology_map[str] = mapped_id;
         id = mapped_id;
@@ -58,6 +61,9 @@ unsigned int rdf_parser::get_mapped_id(boost::unordered_map<std::string, unsigne
   } else { // Object or subject. Convert entity and ontology into entity.
     if (is_resource(str) || is_ontology(str)) {
       str = str.substr(PREFIX_MAGIC);
+      if (str.length() == 0) {
+        str = "."; // Fix prasing problem when the URI is "....resource/."
+      }
       if (resource_map.find(str) == resource_map.end()) {
         resource_map[str] = mapped_id;
         id = mapped_id;
