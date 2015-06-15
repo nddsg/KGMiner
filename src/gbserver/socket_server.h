@@ -11,19 +11,55 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 
+#include <string>
+#include <sstream>
+#include <vector>
+
 namespace local = boost::asio::local;
 
 void worker(local::stream_protocol::socket *socket, graph<std::string, std::string>& g) {
   std::cout << "hello socket\n";
-  std::vector< std::vector<unsigned int> > paths = g.dfs(1, 10, 3);
-  std::cout << "find " << paths.size() << " paths\n";
-  for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
-    for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-      std::cout << *itt << " ";
+  boost::array<char, 1024> buf;
+  boost::system::error_code error;
+  size_t len = boost::asio::read(*socket, boost::asio::buffer(buf), error);
+
+  std::vector<std::string> commands;
+  std::stringbuf strbuf;
+  for(int i = 0; i < len; i++) {
+    if (buf.elems[i] != ',' && buf.elems[i] != ' ') {
+      strbuf.sputc(buf.elems[i]);
+    } else {
+      commands.push_back(strbuf.str());
+      strbuf.str("");
     }
-    std::cout << "\n";
   }
-  boost::asio::write(*socket, boost::asio::buffer("hey socket!\n"));
+  commands.push_back(strbuf.str());
+
+  std::string return_string = "";
+
+  if (commands.size() == 0) {
+    return_string = "No command provided\n";
+  }else if (commands.at(0) == "path") {
+    std::cout << (unsigned int)stoi(commands.at(1)) << " " << commands.at(1)<< " "
+              << (unsigned int)stoi(commands.at(2)) << " " << commands.at(2)<< " "
+              << (unsigned int)stoi(commands.at(3)) << " " << commands.at(3) << std::endl;
+    std::vector< std::vector<unsigned int> > paths = g.dfs((unsigned int)stoi(commands.at(1)),
+                                                           (unsigned int)stoi(commands.at(2)),
+                                                           (unsigned int)stoi(commands.at(3)));
+    std::cout << "find " << paths.size() << " paths\n";
+    for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
+      for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+        std::cout << *itt << " ";
+      }
+      std::cout << "\n";
+    }
+    return_string = "Supported command\n";
+  } else {
+    return_string = "Unsupported command\n";
+  }
+
+
+  boost::asio::write(*socket, boost::asio::buffer(return_string));
   socket->close();
   delete socket;
 }
