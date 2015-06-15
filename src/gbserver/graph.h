@@ -58,7 +58,7 @@ class graph {
     }
 
     if (!is_directed) {
-      for(auto it = edges.get_backward().cend();
+      for(auto it = edges.get_backward().cbegin();
           it != edges.get_backward().cend(); ++it) {
         if (visited.find(it->first) == visited.end() || it->first == dst) {
           tmp_path.push_back(it->first);
