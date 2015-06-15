@@ -45,7 +45,7 @@ class graph {
         it != edges.get_forward().cend(); ++it) {
         if (visited.find(it->first) == visited.end()) { // never visited
           tmp_path.push_back(it->first);
-          dfs_helper(src, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
           visited.insert(it->first);
         }
@@ -56,7 +56,7 @@ class graph {
           it != edges.get_backward().cend(); ++it) {
         if (visited.find(it->first) == visited.end()) {
           tmp_path.push_back(it->first);
-          dfs_helper(src, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
           visited.insert(it->first);
         }
@@ -90,7 +90,7 @@ public:
       std::set<unsigned int> visited;
       tmp_path.push_back(src);
       visited.insert(src);
-      dfs_helper(src, dst, 0u, depth, tmp_path, visited, result, is_directed);
+      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed);
       assert(tmp_path.size() == 1); // only source node is in it.
     } catch (std::exception error) {
       std::cout << "Error occurred when performing dfs, " << error.what() << std::endl;

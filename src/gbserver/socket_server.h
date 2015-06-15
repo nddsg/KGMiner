@@ -40,20 +40,24 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   if (commands.size() == 0) {
     return_string = "No command provided\n";
   }else if (commands.at(0) == "path") {
-    std::cout << (unsigned int)stoi(commands.at(1)) << " " << commands.at(1)<< " "
-              << (unsigned int)stoi(commands.at(2)) << " " << commands.at(2)<< " "
-              << (unsigned int)stoi(commands.at(3)) << " " << commands.at(3) << std::endl;
-    std::vector< std::vector<unsigned int> > paths = g.dfs((unsigned int)stoi(commands.at(1)),
-                                                           (unsigned int)stoi(commands.at(2)),
-                                                           (unsigned int)stoi(commands.at(3)));
-    std::cout << "find " << paths.size() << " paths\n";
-    for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
-      for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-        std::cout << *itt << " ";
+    try{
+      std::vector< std::vector<unsigned int> > paths = g.dfs((unsigned int)stoi(commands.at(1)),
+                                                             (unsigned int)stoi(commands.at(2)),
+                                                             (unsigned int)stoi(commands.at(3)),
+                                                             commands.size() == 4 || (commands.at(4) == "true" ||
+                                                                 commands.at(4) == "TRUE" || commands.at(4) == "T"));
+      std::cout << "find " << paths.size() << " paths\n";
+      for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
+        for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+          std::cout << *itt << "--";
+        }
+        std::cout << "\n";
       }
-      std::cout << "\n";
+      return_string = "Supported command\n";
+    } catch(std::exception error) {
+      return_string = error.what();
     }
-    return_string = "Supported command\n";
+
   } else {
     return_string = "Unsupported command\n";
   }
