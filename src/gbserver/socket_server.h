@@ -68,11 +68,12 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
            commands.at(4).compare("T") == 0));
 
       oss << "find " << paths.size() << " paths\n";
-      oss << commands.at(1) << "-";
       for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+        oss << commands.at(1) << "-";
         for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
           oss << "(" << itt->second << ")-" << itt->first << "-";
         }
+        oss <<std::endl;
       }
       return_string = oss.str();
 
