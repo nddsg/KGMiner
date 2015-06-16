@@ -101,10 +101,13 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   }
 
   try {
-    len = boost::asio::write(*socket, boost::asio::buffer(return_string));
-    if (len != return_string.size()) {
-      std::cerr << "write error, wrote " << len << " characters, " << return_string.size() << " expected.\n";
-    }
+    boost::asio::async_write(*socket, boost::asio::buffer(return_string), boost::asio::transfer_all(),
+                             [&return_string](const boost::system::error_code &error, size_t bytes_transferred) {
+                               if (bytes_transferred != return_string.size()) {
+                                 std::cerr << "write error, wrote " << bytes_transferred << " characters, " <<
+                                 return_string.size() << " expected.\n";
+                               }
+                             });
   } catch (std::exception &exception) {
     std::cerr << exception.what();
   }
