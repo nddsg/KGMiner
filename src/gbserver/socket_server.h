@@ -73,7 +73,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
         for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
           oss << "(" << itt->second << ")-" << itt->first << "-";
         }
-        oss <<std::endl;
+        oss << std::endl;
       }
       return_string = oss.str();
 
@@ -102,9 +102,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   }
 
   try {
-    //TODO: echo "hpath 10387 221 3 F" | socat - UNIX-CONNECT:/tmp/gbserver does not return correctly.
-    //Maybe try output how many bytes we have written will help?
-    len = boost::asio::write(*socket, boost::asio::buffer(return_string, return_string.size()),boost::asio::transfer_all());
+    len = boost::asio::write(*socket, boost::asio::buffer(return_string, return_string.size()),
+                             boost::asio::transfer_all());
 
     if (len != return_string.size()) {
       std::cerr << "write error, wrote " << len << " bytes, " <<
@@ -115,7 +114,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     socket->close();
     delete socket;
   } catch (std::exception &exception) {
-    std::cerr << exception.what();
+    std::cerr << "write error, " << exception.what() <<
+    ". Please enlarge timeout time when trying to get very long path\n";
   }
 }
 
