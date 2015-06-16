@@ -55,13 +55,15 @@ class graph {
 
     if (max_depth == depth) return;
 
-    bool dst_visited = false; // when forward edges can reach destination,
-    // we need to ignore those edges in backward mode so we do not introduce duplicated edges
+    bool dst_visited = false; // on typed network, there may be multiple edges
+    // connects to the same target with different edge types,
+    // we need to ignore these in an untyped setting. This can be done using visited_set
+    // but it can not work with the target node.
 
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
-      if (visited.find(it->first) == visited.end() || it->first == dst) { // never visited
+      if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) { // never visited
         tmp_path.push_back(it->first);
         dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
         tmp_path.pop_back();
@@ -94,7 +96,7 @@ class graph {
                   unsigned depth, unsigned max_depth,
                   std::vector<std::pair<unsigned int, unsigned int> > &tmp_path,
                   std::vector<bool> &reverted_rel,
-                  std::set<unsigned int> &visited,
+                  std::set<unsigned int> &visited, // only contains nodes in the current path
                   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &result,
                   std::vector<std::vector<bool> > &rel_result,
                   bool is_directed) {
