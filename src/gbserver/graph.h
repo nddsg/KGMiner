@@ -93,6 +93,7 @@ class graph {
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
                   std::vector<std::pair<unsigned int, unsigned int> > &tmp_path,
+                  std::set<unsigned int> &visited,
                   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &result,
                   bool is_directed) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back().first == dst) {
@@ -105,20 +106,24 @@ class graph {
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
-      if (!is_loop(tmp_path, it->first)) {
+      if (visited.find(it->first) == visited.end()) {
         tmp_path.push_back(*it);
-        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, result, is_directed);
+        visited.insert(it->first);
+        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
         tmp_path.pop_back();
+        visited.erase(it->first);
       }
     }
 
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
-        if (!is_loop(tmp_path, it->first)) {
+        if (visited.find(it->first) == visited.end()) {
           tmp_path.push_back(*it);
-          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, result, is_directed);
+          visited.insert(it->first);
+          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
+          visited.erase(it->first);
         }
       }
     }
@@ -155,7 +160,6 @@ public:
     return (result);
   }
 
-  //TODO: Remove duplicate result, for example A->B and A<-B in undirected graph
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
                                                           unsigned int dst,
                                                           unsigned int depth = 4,
@@ -191,10 +195,9 @@ public:
 
     try {
       std::vector<std::pair<unsigned int, unsigned int> > tmp_path;
-      // We do not keep a visited list in heterogeneous path finding because
-      //every path has its own edge/node type sequence and keeping a visited node set
-      //will result in only returning the first meta-path that touches the node.
-      dfs_helper(src, dst, 1u, depth, tmp_path, result, is_directed);
+      std::set<unsigned int> visited;
+      visited.insert(src);
+      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed);
           assert(tmp_path.size() == 0);
     } catch (std::exception error) {
       std::cerr << "Error occurred when performing heterogeneous dfs, " << error.what() << std::endl;
