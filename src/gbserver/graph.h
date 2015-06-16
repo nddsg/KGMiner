@@ -22,7 +22,7 @@ class graph {
   std::shared_ptr<edge_loader> edges_ptr;
   std::shared_ptr<type_loader<edge_type> > edgetypes_ptr;
 
-  void is_node_valid(unsigned int id) {
+  inline void is_node_valid(unsigned int id) {
     if (!nodes_ptr->exists(id)) {
       throw std::runtime_error("Nodes " + std::to_string(id) + " does not exist.");
     }
@@ -144,7 +144,6 @@ public:
     return (result);
   }
 
-
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
                                                           unsigned int dst,
                                                           unsigned int depth = 4,
@@ -190,6 +189,14 @@ public:
     }
 
     return result;
+  }
+
+  node_type get_node_type(unsigned int id) {
+    return nodes_ptr->get_value(id);
+  }
+
+  edge_type get_edge_type(unsigned int id) {
+    return edgetypes_ptr->get_value(id);
   }
 
 };

@@ -47,12 +47,25 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
                                                                         (commands.at(4).compare("true") == 0 ||
                                                                          commands.at(4).compare("TRUE") == 0 ||
                                                                          commands.at(4).compare("T") == 0));
+
       oss << "find " << paths.size() << " paths\n";
-      for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
-        for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-          oss << *itt << "--";
+
+      if (commands.size() == 6 && (commands.at(5).compare("true") == 0 ||
+                                   commands.at(5).compare("TRUE") == 0 ||
+                                   commands.at(5).compare("T") == 0)) {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << g.get_node_type(*itt) << "--";
+          }
+          oss << "\n";
         }
-        oss << "\n";
+      } else {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << *itt << "--";
+          }
+          oss << "\n";
+        }
       }
       return_string = oss.str();
 
@@ -68,13 +81,27 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
            commands.at(4).compare("T") == 0));
 
       oss << "find " << paths.size() << " paths\n";
-      for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
-        oss << commands.at(1) << "-";
-        for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-          oss << "(" << itt->second << ")-" << itt->first << "-";
+
+      if (commands.size() == 6 && (commands.at(5).compare("true") == 0 ||
+                                   commands.at(5).compare("TRUE") == 0 ||
+                                   commands.at(5).compare("T") == 0)) {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << "(" << g.get_edge_type(itt->second) << ")-" << g.get_node_type(itt->first) << "-";
+          }
+          oss << std::endl;
         }
-        oss << std::endl;
+      } else {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          oss << commands.at(1) << "-";
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << "(" << itt->second << ")-" << itt->first << "-";
+          }
+          oss << std::endl;
+        }
       }
+
       return_string = oss.str();
 
     } else if (commands.at(0) == "in_neighbor") {
