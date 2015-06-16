@@ -103,27 +103,36 @@ class graph {
 
     if (max_depth == depth) return;
 
+    // We use this temporary set to ensure we do not visit the same node twice using the same edge.
+    // For example, A-(a)->B connects A and B using edge type (a).
+    // On undirected case, we will traverse A-(a)->B and A<-(a)-B due to current implementation.
+    // but with this set, we can make sure we do backward traverse only if there are no forward links
+    // between those two nodes.
+    std::set<std::pair<unsigned int, unsigned int> > local_visited;
+
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
-      if (visited.find(it->first) == visited.end()) {
+      if (visited.find(it->first) == visited.end() && local_visited.find(*it) == local_visited.end()) {
         tmp_path.push_back(*it);
         visited.insert(it->first);
         dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
         tmp_path.pop_back();
         visited.erase(it->first);
+        local_visited.insert(*it);
       }
     }
 
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
-        if (visited.find(it->first) == visited.end()) {
+        if (visited.find(it->first) == visited.end() && local_visited.find(*it) == local_visited.end()) {
           tmp_path.push_back(*it);
           visited.insert(it->first);
           dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
           visited.erase(it->first);
+          local_visited.insert(*it);
         }
       }
     }
