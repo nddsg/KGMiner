@@ -78,6 +78,7 @@ class graph {
     return false;
   }
 
+  //TODO: When working on reversed path, mark the rel as negative?
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
                   std::vector<std::pair<unsigned int, unsigned int> > &tmp_path,
