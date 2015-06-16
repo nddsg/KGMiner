@@ -44,9 +44,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
                                                                         (unsigned int) stoi(commands.at(2)),
                                                                         (unsigned int) stoi(commands.at(3)),
                                                                         commands.size() == 4 ||
-                                                                        (commands.at(4) == "true" ||
-                                                                         commands.at(4) == "TRUE" ||
-                                                                         commands.at(4) == "T"));
+                                                                        (commands.at(4).compare("true") == 0 ||
+                                                                         commands.at(4).compare("TRUE") == 0 ||
+                                                                         commands.at(4).compare("T") == 0));
       oss << "find " << paths.size() << " paths\n";
       for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
         for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
@@ -63,9 +63,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           (unsigned int) stoi(commands.at(2)),
           (unsigned int) stoi(commands.at(3)),
           commands.size() == 4 ||
-          (commands.at(4) == "true" ||
-           commands.at(4) == "TRUE" ||
-           commands.at(4) == "T"));
+          (commands.at(4).compare("true") == 0 ||
+           commands.at(4).compare("TRUE") == 0 ||
+           commands.at(4).compare("T") == 0));
 
       oss << "find " << paths.size() << " paths\n";
       oss << commands.at(1) << "-";
@@ -102,18 +102,18 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
   try {
     boost::asio::async_write(*socket, boost::asio::buffer(return_string), boost::asio::transfer_all(),
-                             [&return_string](const boost::system::error_code &error, size_t bytes_transferred) {
+                             [&return_string, &socket](const boost::system::error_code &error,
+                                                       size_t bytes_transferred) {
                                if (bytes_transferred != return_string.size()) {
                                  std::cerr << "write error, wrote " << bytes_transferred << " characters, " <<
                                  return_string.size() << " expected.\n";
                                }
+                               socket->close();
+                               delete socket;
                              });
   } catch (std::exception &exception) {
     std::cerr << exception.what();
   }
-
-  socket->close();
-  delete socket;
 }
 
 
