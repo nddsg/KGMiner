@@ -104,17 +104,16 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   try {
     //TODO: echo "hpath 10387 221 3 F" | socat - UNIX-CONNECT:/tmp/gbserver does not return correctly.
     //Maybe try output how many bytes we have written will help?
-    boost::asio::async_write(*socket, boost::asio::buffer(return_string), boost::asio::transfer_all(),
-                             [&return_string, &socket](const boost::system::error_code &error,
-                                                       size_t bytes_transferred) {
-                               std::cerr << "wrote " << bytes_transferred << " bytes to client\n";
-                               if (bytes_transferred != return_string.size()) {
-                                 std::cerr << "write error, wrote " << bytes_transferred << " characters, " <<
-                                 return_string.size() << " expected.\n";
-                               }
-                               socket->close();
-                               delete socket;
-                             });
+    len = boost::asio::write(*socket, boost::asio::buffer(return_string, return_string.size()),boost::asio::transfer_all());
+
+    if (len != return_string.size()) {
+      std::cerr << "write error, wrote " << len << " bytes, " <<
+      return_string.size() << " expected.\n";
+    } else {
+      std::cerr << "wrote " << len << " bytes to client\n";
+    }
+    socket->close();
+    delete socket;
   } catch (std::exception &exception) {
     std::cerr << exception.what();
   }
