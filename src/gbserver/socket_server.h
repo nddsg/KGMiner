@@ -32,7 +32,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       strbuf.str("");
     }
   }
-  commands.push_back(strbuf.str());
+  //commands.push_back(strbuf.str());
 
   std::string return_string = "";
   try {
@@ -49,8 +49,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
                                                                          commands.at(4).compare("T") == 0));
 
       oss << "find " << paths.size() << " paths\n";
-
-      if (commands.size() == 6 && (commands.at(5).compare("true") == 0 ||
+      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
                                    commands.at(5).compare("TRUE") == 0 ||
                                    commands.at(5).compare("T") == 0)) {
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
@@ -82,7 +81,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
       oss << "find " << paths.size() << " paths\n";
 
-      if (commands.size() == 6 && (commands.at(5).compare("true") == 0 ||
+      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
                                    commands.at(5).compare("TRUE") == 0 ||
                                    commands.at(5).compare("T") == 0)) {
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
