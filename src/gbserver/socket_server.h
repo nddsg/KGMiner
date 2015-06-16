@@ -87,7 +87,15 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   }
 
 
-  boost::asio::write(*socket, boost::asio::buffer(return_string));
+  try{
+    len = boost::asio::write(*socket, boost::asio::buffer(return_string));
+    if (len !=return_string.size()) {
+      std::cerr << "write error, wrote " << len << " characters, " << return_string.size() << " expected.\n";
+    }
+  } catch (std::exception &exception) {
+    std::cerr << exception.what();
+  }
+
   socket->close();
   delete socket;
 }
