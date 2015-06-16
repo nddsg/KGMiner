@@ -11,6 +11,7 @@
 #include "edge_list.h"
 
 #include <set>
+#include <tuple>
 
 template<typename ND, typename TD>
 class graph {
@@ -93,46 +94,46 @@ class graph {
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
                   std::vector<std::pair<unsigned int, unsigned int> > &tmp_path,
+                  std::vector<bool> &reverted_rel,
                   std::set<unsigned int> &visited,
                   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &result,
+                  std::vector<std::vector<bool> > &rel_result,
                   bool is_directed) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back().first == dst) {
       result.push_back(tmp_path);
+      rel_result.push_back(reverted_rel);
       return;
     }
 
     if (max_depth == depth) return;
 
-    // We use this temporary set to ensure we do not visit the same node twice using the same edge.
-    // For example, A-(a)->B connects A and B using edge type (a).
-    // On undirected case, we will traverse A-(a)->B and A<-(a)-B due to current implementation.
-    // but with this set, we can make sure we do backward traverse only if there are no forward links
-    // between those two nodes.
-    std::set<std::pair<unsigned int, unsigned int> > local_visited;
-
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
-      if (visited.find(it->first) == visited.end() && local_visited.find(*it) == local_visited.end()) {
+      if (visited.find(it->first) == visited.end()) {
         tmp_path.push_back(*it);
+        reverted_rel.push_back(false);
         visited.insert(it->first);
-        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
+                   is_directed);
         tmp_path.pop_back();
+        reverted_rel.pop_back();
         visited.erase(it->first);
-        local_visited.insert(*it);
       }
     }
 
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
-        if (visited.find(it->first) == visited.end() && local_visited.find(*it) == local_visited.end()) {
+        if (visited.find(it->first) == visited.end()) {
           tmp_path.push_back(*it);
+          reverted_rel.push_back(true);
           visited.insert(it->first);
-          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
+                     is_directed);
           tmp_path.pop_back();
+          reverted_rel.pop_back();
           visited.erase(it->first);
-          local_visited.insert(*it);
         }
       }
     }
@@ -193,26 +194,32 @@ public:
 
   };
 
-  std::vector<std::vector<std::pair<unsigned int, unsigned int> > > heterogeneous_dfs(unsigned int src,
-                                                                                      unsigned int dst,
-                                                                                      unsigned int depth = 4,
-                                                                                      bool is_directed = true) {
+  std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > heterogeneous_dfs(
+      unsigned int src,
+      unsigned int dst,
+      unsigned int depth = 4,
+      bool is_directed = true) {
     is_node_valid(src);
     is_node_valid(dst);
 
-    std::vector<std::vector<std::pair<unsigned int, unsigned int> > > result;
+    std::vector<std::vector<std::pair<unsigned int, unsigned int> > > path_result;
+    std::vector<std::vector<bool> > rel_result;
 
     try {
       std::vector<std::pair<unsigned int, unsigned int> > tmp_path;
+      std::vector<bool> tmp_reverted;
       std::set<unsigned int> visited;
       visited.insert(src);
-      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed);
-          assert(tmp_path.size() == 0);
+      dfs_helper(src, dst, 1u, depth, tmp_path, tmp_reverted, visited, path_result, rel_result, is_directed);
+      assert(tmp_path.size() == 0);
     } catch (std::exception error) {
       std::cerr << "Error occurred when performing heterogeneous dfs, " << error.what() << std::endl;
     }
 
-    return result;
+    assert(path_result.size() == rel_result.size());
+
+    return std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > >(
+        path_result, rel_result);
   }
 
   node_type get_node_type(unsigned int id) {

@@ -70,7 +70,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
     } else if (commands.at(0) == "hpath") {
       std::ostringstream oss;
-      std::vector<std::vector<std::pair<unsigned int, unsigned int> > > paths = g.heterogeneous_dfs(
+      std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
           (unsigned int) stoi(commands.at(1)),
           (unsigned int) stoi(commands.at(2)),
           (unsigned int) stoi(commands.at(3)),
@@ -79,24 +79,36 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
            commands.at(4).compare("TRUE") == 0 ||
            commands.at(4).compare("T") == 0));
 
+      std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
+      std::vector<std::vector<bool> > &rel_paths = hpaths.second;
+
       oss << "find " << paths.size() << " paths\n";
 
       if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
                                    commands.at(5).compare("TRUE") == 0 ||
                                    commands.at(5).compare("T") == 0)) {
+        size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
+          path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-            oss << "(" << g.get_edge_type(itt->second) << ")-" << g.get_node_type(itt->first) << "-";
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << g.get_edge_type(itt->second) << ")-" <<
+            g.get_node_type(itt->first) << "-";
+            path_pos++;
           }
           oss << std::endl;
+          path_id++;
         }
       } else {
+        size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << commands.at(1) << "-";
+          path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-            oss << "(" << itt->second << ")-" << itt->first << "-";
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << itt->second << ")-" << itt->first << "-";
+            path_pos++;
           }
+          path_id++;
           oss << std::endl;
         }
       }
