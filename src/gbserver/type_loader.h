@@ -10,7 +10,8 @@
 #include <fstream>
 #include <iostream>
 
-template <typename T> class type_loader {
+template<typename T>
+class type_loader {
 
 public:
   typedef T value_type;
@@ -21,14 +22,14 @@ private:
 
 public:
 
-  type_loader(std::string type_filepath) : max_rel(0), type_map(std::vector<value_type>()) {
+  type_loader(std::string type_filepath) noexcept : max_rel(0), type_map(std::vector<value_type>()) {
 
     std::fstream fin(type_filepath, std::fstream::in);
 
     value_type val;
     unsigned int id;
 
-    while(!fin.eof()) {
+    while (!fin.eof()) {
       fin >> id;
       fin.get(); // remove separator
       fin >> val;
@@ -44,8 +45,15 @@ public:
     fin.close();
   };
 
-  unsigned int getMax_rel() const {
+  unsigned int getMax_rel() const noexcept {
     return max_rel;
+  }
+
+  value_type get_value(unsigned int id) const {
+    if (id > getMax_rel()) {
+      throw std::runtime_error(std::to_string(id) + " is larger than max id in typelist.");
+    }
+    return type_map.at(id);
   }
 
 };

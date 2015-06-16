@@ -17,87 +17,144 @@
 
 namespace local = boost::asio::local;
 
-void worker(local::stream_protocol::socket *socket, graph<std::string, std::string>& g) {
+void worker(local::stream_protocol::socket *socket, graph<std::string, std::string> &g) {
   boost::array<char, 1024> buf;
   boost::system::error_code error;
   size_t len = boost::asio::read(*socket, boost::asio::buffer(buf), error);
 
   std::vector<std::string> commands;
   std::stringbuf strbuf;
-  for(int i = 0; i < len; i++) {
-    if (buf.elems[i] != ',' && buf.elems[i] != ' ') {
+  for (int i = 0; i < len; i++) {
+    if (buf.elems[i] != ',' && buf.elems[i] != ' ' && buf.elems[i] != '\n') {
       strbuf.sputc(buf.elems[i]);
     } else {
       commands.push_back(strbuf.str());
       strbuf.str("");
     }
   }
-  commands.push_back(strbuf.str());
+  //commands.push_back(strbuf.str());
 
   std::string return_string = "";
-
-  if (commands.size() == 0) {
-    return_string = "No command provided\n";
-  }else if (commands.at(0) == "path") {
-    try{
+  try {
+    if (commands.size() == 0) {
+      return_string = "No command provided\n";
+    } else if (commands.at(0) == "path") {
       std::ostringstream oss;
-      std::vector< std::vector<unsigned int> > paths = g.dfs((unsigned int)stoi(commands.at(1)),
-                                                             (unsigned int)stoi(commands.at(2)),
-                                                             (unsigned int)stoi(commands.at(3)),
-                                                             commands.size() == 4 || (commands.at(4) == "true" ||
-                                                                 commands.at(4) == "TRUE" || commands.at(4) == "T"));
+      std::vector<std::vector<unsigned int> > paths = g.homogeneous_dfs((unsigned int) stoi(commands.at(1)),
+                                                                        (unsigned int) stoi(commands.at(2)),
+                                                                        (unsigned int) stoi(commands.at(3)),
+                                                                        commands.size() == 4 ||
+                                                                        (commands.at(4).compare("true") == 0 ||
+                                                                         commands.at(4).compare("TRUE") == 0 ||
+                                                                         commands.at(4).compare("T") == 0));
+
       oss << "find " << paths.size() << " paths\n";
-      for(auto it = paths.cbegin(); it != paths.cend(); ++it) {
-        for(auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-          oss << *itt << "--";
+      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
+                                   commands.at(5).compare("TRUE") == 0 ||
+                                   commands.at(5).compare("T") == 0)) {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << g.get_node_type(*itt) << "--";
+          }
+          oss << "\n";
         }
-        oss << "\n";
+      } else {
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << *itt << "--";
+          }
+          oss << "\n";
+        }
       }
       return_string = oss.str();
-    } catch(std::exception error) {
-      return_string = error.what();
-    }
 
-  } else if (commands.at(0) == "in_neighbor") {
-    try {
+    } else if (commands.at(0) == "hpath") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_in_edges((unsigned int)stoi(commands.at(1)));
-      for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
+      std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
+          (unsigned int) stoi(commands.at(1)),
+          (unsigned int) stoi(commands.at(2)),
+          (unsigned int) stoi(commands.at(3)),
+          commands.size() == 4 ||
+          (commands.at(4).compare("true") == 0 ||
+           commands.at(4).compare("TRUE") == 0 ||
+           commands.at(4).compare("T") == 0));
+
+      std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
+      std::vector<std::vector<bool> > &rel_paths = hpaths.second;
+
+      oss << "find " << paths.size() << " paths\n";
+
+      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
+                                   commands.at(5).compare("TRUE") == 0 ||
+                                   commands.at(5).compare("T") == 0)) {
+        size_t path_id = 0, path_pos = 0;
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
+          path_pos = 0;
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << g.get_edge_type(itt->second) << ")-" <<
+            g.get_node_type(itt->first) << "-";
+            path_pos++;
+          }
+          oss << std::endl;
+          path_id++;
+        }
+      } else {
+        size_t path_id = 0, path_pos = 0;
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          oss << commands.at(1) << "-";
+          path_pos = 0;
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << itt->second << ")-" << itt->first << "-";
+            path_pos++;
+          }
+          path_id++;
+          oss << std::endl;
+        }
+      }
+
+      return_string = oss.str();
+
+    } else if (commands.at(0) == "in_neighbor") {
+      std::ostringstream oss;
+      std::vector<unsigned int> neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
+      for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
       oss << "\n";
       return_string = oss.str();
-    } catch(std::exception error) {
-      return_string = error.what();
-    }
-  } else if (commands.at(0) == "out_neighbor") {
-    try {
+    } else if (commands.at(0) == "out_neighbor") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_out_edges((unsigned int)stoi(commands.at(1)));
-      for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
+      std::vector<unsigned int> neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
+      for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
       oss << "\n";
       return_string = oss.str();
-    } catch(std::exception error) {
-      return_string = error.what();
+    } else {
+      return_string = "Unsupported command\n";
     }
-  } else {
-    return_string = "Unsupported command\n";
+  } catch (std::exception error) {
+    std::cerr << error.what() << std::endl;
+    return_string = error.what();
   }
 
+  try {
+    len = boost::asio::write(*socket, boost::asio::buffer(return_string, return_string.size()),
+                             boost::asio::transfer_all());
 
-  try{
-    len = boost::asio::write(*socket, boost::asio::buffer(return_string));
-    if (len !=return_string.size()) {
-      std::cerr << "write error, wrote " << len << " characters, " << return_string.size() << " expected.\n";
+    if (len != return_string.size()) {
+      std::cerr << "write error, wrote " << len << " bytes, " <<
+      return_string.size() << " expected.\n";
+    } else {
+      std::cerr << "wrote " << len << " bytes to client\n";
     }
+    socket->close();
+    delete socket;
   } catch (std::exception &exception) {
-    std::cerr << exception.what();
+    std::cerr << "write error, " << exception.what() <<
+    ". Please enlarge timeout time when trying to get very long path\n";
   }
-
-  socket->close();
-  delete socket;
 }
 
 
@@ -111,27 +168,27 @@ public:
 
   socket_server(int nworkers = 10) {
     work = new boost::asio::io_service::work(worker_io_service);
-    for(int i = 0 ; i < nworkers; i++) {
+    for (int i = 0; i < nworkers; i++) {
       threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &worker_io_service));
     }
 
     std::cout << threadpool.size() << " threads are created\n";
   }
 
-  void start(std::string socket_name, graph<std::string, std::string>& g) {
+  void start(std::string socket_name, graph<std::string, std::string> &g) {
     boost::asio::io_service socket_io_service;
     ::unlink(socket_name.c_str());
     local::stream_protocol::endpoint ep(socket_name);
     local::stream_protocol::acceptor acceptor(socket_io_service, ep);
 
-    while(true) { //TODO: Throw Broken pipe error when all workers are busy and a lot of requests are coming.
+    while (true) { //TODO: Throw Broken pipe error when all workers are busy and a lot of requests are coming.
       local::stream_protocol::socket *socket = new local::stream_protocol::socket(socket_io_service);
       acceptor.accept(*socket);
       worker_io_service.post(boost::bind(worker, socket, g));
     }
   }
 
-  void cleanup(){
+  void cleanup() {
     worker_io_service.stop();
     threadpool.join_all();
   }
