@@ -25,7 +25,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   std::vector<std::string> commands;
   std::stringbuf strbuf;
   for (int i = 0; i < len; i++) {
-    if (buf.elems[i] != ',' && buf.elems[i] != ' ') {
+    if (buf.elems[i] != ',' && buf.elems[i] != ' ' && buf.elems[i] != '\n') {
       strbuf.sputc(buf.elems[i]);
     } else {
       commands.push_back(strbuf.str());
