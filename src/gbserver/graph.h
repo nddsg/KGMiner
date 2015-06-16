@@ -28,8 +28,16 @@ class graph {
     }
   }
 
+  inline bool is_loop(std::vector<std::pair<unsigned int, unsigned int> > &path, unsigned int id) noexcept {
+    for (auto it = path.cbegin(); it != path.cend(); ++it) {
+      if (it->first == id) return true;
+    }
+    return false;
+  }
+
+
   /**
-   * homogeneous dfs helper
+   * Homogeneous dfs helper
    */
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
@@ -46,6 +54,9 @@ class graph {
 
     if (max_depth == depth) return;
 
+    bool dst_visited = false; // when forward edges can reach destination,
+    // we need to ignore those edges in backward mode so we do not introduce duplicated edges
+
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
@@ -54,13 +65,16 @@ class graph {
         dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
         tmp_path.pop_back();
         visited.insert(it->first);
+        if (it->first == dst) {
+          dst_visited = true;
+        }
       }
     }
 
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
-        if (visited.find(it->first) == visited.end() || it->first == dst) {
+        if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) {
           tmp_path.push_back(it->first);
           dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
           tmp_path.pop_back();
@@ -71,13 +85,10 @@ class graph {
 
   }
 
-  inline bool is_loop(std::vector<std::pair<unsigned int, unsigned int> > &path, unsigned int id) noexcept {
-    for (auto it = path.cbegin(); it != path.cend(); ++it) {
-      if (it->first == id) return true;
-    }
-    return false;
-  }
 
+  /**
+   * Heterogeneous dfs helper
+   */
   //TODO: When working on reversed path, mark the rel as negative?
   void dfs_helper(unsigned int src, unsigned int dst,
                   unsigned depth, unsigned max_depth,
@@ -144,6 +155,7 @@ public:
     return (result);
   }
 
+  //TODO: Remove duplicate result, for example A->B and A<-B in undirected graph
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
                                                           unsigned int dst,
                                                           unsigned int depth = 4,
