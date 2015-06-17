@@ -271,6 +271,29 @@ public:
     return result;
   }
 
+  double semantic_proximity(unsigned int src, unsigned dst) {
+    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, true);
+    // Remove direct connected link
+    auto it = paths.begin();
+    while (it != paths.end()) {
+      if (it->size() == 2) {
+        it = paths.erase(it);
+      } else {
+        it++;
+      }
+    }
+
+    double result = 0;
+    for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+      double denominator = 1;
+      for (auto itt = it->cbegin() + 1; itt != it->cend() - 1; ++itt) {
+        denominator += log(get_out_edges(*itt).size() + get_in_edges(*itt).size());
+      }
+      result = result > 1.0 / denominator ? result : 1.0 / denominator;
+    }
+    return result;
+  }
+
 };
 
 #endif //GBPEDIA_GRAPH_H
