@@ -156,6 +156,8 @@ public:
     for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
       result.push_back(it->first);
     }
+    sort(result.begin(), result.end());
+    result.erase(unique(result.begin(), result.end()), result.end());
     return (result);
 
   }
@@ -167,6 +169,8 @@ public:
     for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
       result.push_back(it->first);
     }
+    sort(result.begin(), result.end());
+    result.erase(unique(result.begin(), result.end()), result.end());
     return (result);
   }
 
