@@ -12,6 +12,7 @@
 
 #include <set>
 #include <tuple>
+#include <algorithm>
 
 template<typename ND, typename TD>
 class graph {
@@ -46,8 +47,6 @@ class graph {
                   std::set<unsigned int> &visited,
                   std::vector<std::vector<unsigned int> > &result,
                   bool is_directed) {
-
-
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back() == dst) {
       result.push_back(tmp_path);
       return;
@@ -157,6 +156,8 @@ public:
     for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
       result.push_back(it->first);
     }
+    sort(result.begin(), result.end());
+    result.erase(unique(result.begin(), result.end()), result.end());
     return (result);
 
   }
@@ -168,6 +169,8 @@ public:
     for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
       result.push_back(it->first);
     }
+    sort(result.begin(), result.end());
+    result.erase(unique(result.begin(), result.end()), result.end());
     return (result);
   }
 
@@ -229,6 +232,43 @@ public:
 
   edge_type get_edge_type(unsigned int id) {
     return edgetypes_ptr->get_value(id);
+  }
+
+  double adamic_adar(unsigned int id1, unsigned id2) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+
+    std::set<unsigned int> neighbors1;
+    std::set<unsigned int> neighbors2;
+
+    auto get_neighbors = [](std::set<unsigned int> &neighbors, edge_list &edges) {
+      for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+        neighbors.insert(it->first);
+      }
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
+        neighbors.insert(it->first);
+      }
+    };
+
+    get_neighbors(neighbors1, edges_ptr->get_edges(id1));
+    get_neighbors(neighbors2, edges_ptr->get_edges(id2));
+
+    std::vector<unsigned int> common_neighbors;
+
+    for (auto it = neighbors1.cbegin(); it != neighbors1.cend(); ++it) {
+      if (neighbors2.find(*it) != neighbors2.end()) {
+        common_neighbors.push_back(*it);
+      }
+    }
+
+    double result = 0.0;
+
+    for (auto it = common_neighbors.cbegin(); it != common_neighbors.cend(); ++it) {
+      size_t degree = get_out_edges(*it).size() + get_in_edges(*it).size();
+      result += 1.0 / log(degree);
+    }
+
+    return result;
   }
 
 };

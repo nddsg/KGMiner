@@ -38,7 +38,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   try {
     if (commands.size() == 0) {
       return_string = "No command provided\n";
-    } else if (commands.at(0) == "path") {
+    } else if (commands.at(0).compare("path") == 0) {
       std::ostringstream oss;
       std::vector<std::vector<unsigned int> > paths = g.homogeneous_dfs((unsigned int) stoi(commands.at(1)),
                                                                         (unsigned int) stoi(commands.at(2)),
@@ -68,7 +68,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       return_string = oss.str();
 
-    } else if (commands.at(0) == "hpath") {
+    } else if (commands.at(0).compare("hpath") == 0) {
       std::ostringstream oss;
       std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
           (unsigned int) stoi(commands.at(1)),
@@ -131,6 +131,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       oss << "\n";
       return_string = oss.str();
+    } else if (commands.at(0) == "aa") {
+      return_string = std::to_string(
+          g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
     } else {
       return_string = "Unsupported command\n";
     }
