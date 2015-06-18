@@ -149,29 +149,15 @@ public:
       edges_ptr(&edges),
       edgetypes_ptr(&edgetypes) { };
 
-  std::vector<unsigned int> get_out_edges(unsigned src) {
+  const std::set<unsigned int> &get_out_edges(unsigned src) {
     is_node_valid(src);
-    std::vector<unsigned int> result;
-    edge_list &edges = edges_ptr->get_edges(src);
-    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
-      result.push_back(it->first);
-    }
-    sort(result.begin(), result.end());
-    result.erase(unique(result.begin(), result.end()), result.end());
-    return (result);
+    return edges_ptr->get_edges(src).get_out_neighbors();
 
   }
 
-  std::vector<unsigned int> get_in_edges(unsigned src) {
+  const std::set<unsigned int> &get_in_edges(unsigned src) {
     is_node_valid(src);
-    std::vector<unsigned int> result;
-    edge_list &edges = edges_ptr->get_edges(src);
-    for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
-      result.push_back(it->first);
-    }
-    sort(result.begin(), result.end());
-    result.erase(unique(result.begin(), result.end()), result.end());
-    return (result);
+    return edges_ptr->get_edges(src).get_in_neighbors();
   }
 
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
@@ -264,10 +250,33 @@ public:
     double result = 0.0;
 
     for (auto it = common_neighbors.cbegin(); it != common_neighbors.cend(); ++it) {
-      size_t degree = get_out_edges(*it).size() + get_in_edges(*it).size();
+      size_t degree = edges_ptr->get_edges(*it).get_deg();
       result += 1.0 / log(degree);
     }
 
+    return result;
+  }
+
+  double semantic_proximity(unsigned int src, unsigned dst) {
+    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, false);
+    // Remove direct connected link
+    auto it = paths.begin();
+    while (it != paths.end()) {
+      if (it->size() == 2) {
+        it = paths.erase(it);
+      } else {
+        it++;
+      }
+    }
+
+    double result = 0;
+    for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+      double denominator = 1;
+      for (auto itt = it->cbegin() + 1; itt != it->cend() - 1; ++itt) {
+        denominator += log(edges_ptr->get_edges(*itt).get_deg());
+      }
+      result = result > 1.0 / denominator ? result : 1.0 / denominator;
+    }
     return result;
   }
 

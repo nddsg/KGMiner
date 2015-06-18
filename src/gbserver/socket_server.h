@@ -117,7 +117,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
     } else if (commands.at(0) == "in_neighbor") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
+      const std::set<unsigned int> &neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
       for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
@@ -125,7 +125,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = oss.str();
     } else if (commands.at(0) == "out_neighbor") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
+      const std::set<unsigned int> &neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
       for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
@@ -134,11 +134,14 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
           g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+    } else if (commands.at(0) == "sp") {
+      return_string = std::to_string(
+          g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
     } else {
       return_string = "Unsupported command\n";
     }
   } catch (std::exception error) {
-    std::cerr << error.what() << std::endl;
+    std::cerr << "Error occurred when executing command " << buf.elems << ". Error is " << error.what() << std::endl;
     return_string = error.what();
   }
 
