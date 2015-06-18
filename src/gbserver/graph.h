@@ -220,32 +220,15 @@ public:
     return edgetypes_ptr->get_value(id);
   }
 
-  double adamic_adar(unsigned int id1, unsigned id2) {
+  /**
+   * [1]	L. A. Adamic and E. Adar,
+   *      “Friends and neighbors on the Web,” Social Networks, vol. 25, no. 3, pp. 211–230, Jul. 2003.
+   */
+  double adamic_adar(unsigned int id1, unsigned id2, unsigned int rel_type = 0) {
     is_node_valid(id1);
     is_node_valid(id2);
 
-    std::set<unsigned int> neighbors1;
-    std::set<unsigned int> neighbors2;
-
-    auto get_neighbors = [](std::set<unsigned int> &neighbors, edge_list &edges) {
-      for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
-        neighbors.insert(it->first);
-      }
-      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
-        neighbors.insert(it->first);
-      }
-    };
-
-    get_neighbors(neighbors1, edges_ptr->get_edges(id1));
-    get_neighbors(neighbors2, edges_ptr->get_edges(id2));
-
-    std::vector<unsigned int> common_neighbors;
-
-    for (auto it = neighbors1.cbegin(); it != neighbors1.cend(); ++it) {
-      if (neighbors2.find(*it) != neighbors2.end()) {
-        common_neighbors.push_back(*it);
-      }
-    }
+    std::vector<unsigned int> common_neighbors = edges_ptr->get_common_neighbor(id1, id2, rel_type, false);
 
     double result = 0.0;
 
@@ -257,6 +240,10 @@ public:
     return result;
   }
 
+  /**
+   * [1]	G. L. Ciampaglia, P. Shiralkar, L. M. Rocha, J. Bollen, F. Menczer, and A. Flammini,
+   *      “Computational fact checking from knowledge networks,” Physical review E, vol. cs.CY. 14-Jan-2015.
+   */
   double semantic_proximity(unsigned int src, unsigned dst) {
     std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, false);
     // Remove direct connected link
@@ -278,6 +265,24 @@ public:
       result = result > 1.0 / denominator ? result : 1.0 / denominator;
     }
     return result;
+  }
+
+  /**
+   * [1]	G. Rossetti, M. Berlingerio, and F. Giannotti,
+   *      “Scalable Link Prediction on Multidimensional Networks.,” ICDM Workshops, pp. 979–986, 2011.
+   *
+   * Multidimensional Adamic Adar * Edge Dimension Connectivity
+   */
+  double multidimensional_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+
+    double maa = adamic_adar(id1, id2, rel_type);
+
+    double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / edges_ptr->getMax_id();
+
+    return maa * ndc;
+
   }
 
 };

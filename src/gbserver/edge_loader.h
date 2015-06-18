@@ -17,6 +17,7 @@ class edge_loader {
 private:
 
   std::vector<edge_list> edge_map;
+  std::vector<unsigned int> edge_type_count;
   uint max_id, max_rel, nedges;
 
 public:
@@ -33,7 +34,13 @@ public:
       if (std::max(src, dst) >= edge_map.size()) { /* Enlarge edge_map so it can contain certain number of nodes */
         edge_map.resize(std::max(src, dst) + 1u, edge_list());
       }
-      
+
+      /* Log node count and edge count regarding to edge type */
+      if (rel >= edge_type_count.size()) {
+        edge_type_count.resize(rel + 1u, 0);
+      }
+      edge_type_count[rel]++;
+
       /* Log forward edge */
       edge_map[src].connect_to(dst, rel);
 
@@ -63,6 +70,43 @@ public:
 
   unsigned int getNedges() const {
     return nedges;
+  }
+
+  unsigned int get_edge_type_count(unsigned int rel_type) const {
+    return rel_type == 0 ? getMax_id() : edge_type_count.at(rel_type);
+  }
+
+  std::set<unsigned int> get_neighbors(unsigned int id, unsigned int rel_type = 0, bool is_directed = false) {
+    std::set<unsigned int> neighbors;
+    for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
+      if (rel_type == 0 || rel_type == it->second) {
+        neighbors.insert(it->first);
+      }
+    }
+    if (!is_directed) {
+      for (auto it = get_edges(id).get_backward().cbegin(); it != get_edges(id).get_backward().cend(); ++it) {
+        if (rel_type == 0 || rel_type == it->second) {
+          neighbors.insert(it->first);
+        }
+      }
+    }
+    return neighbors;
+  }
+
+  std::vector<unsigned int> get_common_neighbor(unsigned int id1, unsigned int id2, unsigned int rel_type = 0,
+                                                bool is_directed = false) {
+    std::set<unsigned int> neighbors_1 = get_neighbors(id1, rel_type, is_directed);
+    std::set<unsigned int> neighbors_2 = get_neighbors(id2, rel_type, is_directed);
+
+    std::vector<unsigned int> common_neighbors;
+
+    for (auto it = neighbors_1.cbegin(); it != neighbors_1.cend(); ++it) {
+      if (neighbors_2.find(*it) != neighbors_2.end()) {
+        common_neighbors.push_back(*it);
+      }
+    }
+
+    return common_neighbors;
   }
 
 };
