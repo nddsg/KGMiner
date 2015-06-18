@@ -141,7 +141,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = "Unsupported command\n";
     }
   } catch (std::exception error) {
-    std::cerr << error.what() << std::endl;
+    std::cerr << "Error occurred when executing command " << buf.elems << ". Error is " << error.what() << std::endl;
     return_string = error.what();
   }
 
