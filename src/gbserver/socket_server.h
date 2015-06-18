@@ -117,7 +117,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
     } else if (commands.at(0) == "in_neighbor") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
+      const std::set<unsigned int> &neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
       for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
@@ -125,7 +125,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = oss.str();
     } else if (commands.at(0) == "out_neighbor") {
       std::ostringstream oss;
-      std::vector<unsigned int> neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
+      const std::set<unsigned int> &neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
       for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
       }
