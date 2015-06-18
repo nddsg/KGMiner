@@ -272,7 +272,7 @@ public:
   }
 
   double semantic_proximity(unsigned int src, unsigned dst) {
-    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, true);
+    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, false);
     // Remove direct connected link
     auto it = paths.begin();
     while (it != paths.end()) {
