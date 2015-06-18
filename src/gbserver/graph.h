@@ -279,7 +279,7 @@ public:
 
     double maa = adamic_adar(id1, id2, rel_type);
 
-    double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / nodes_ptr->getMax_id();
+    double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / edges_ptr->getMax_id();
 
     return maa * ndc;
 

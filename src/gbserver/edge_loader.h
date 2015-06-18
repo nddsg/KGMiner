@@ -73,7 +73,7 @@ public:
   }
 
   unsigned int get_edge_type_count(unsigned int rel_type) const {
-    return edge_type_count.at(rel_type);
+    return rel_type == 0 ? getMax_id() : edge_type_count.at(rel_type);
   }
 
   std::set<unsigned int> get_neighbors(unsigned int id, unsigned int rel_type = 0, bool is_directed = false) {
