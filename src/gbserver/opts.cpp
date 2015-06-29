@@ -21,7 +21,7 @@ opts::opts() : desc("Allowed options") {
         ("directed,d", "Directed graph")
         ("port,p", boost::program_options::value<int>(),
          port_desc.c_str())
-        ("worker,n", boost::program_options::value<int>(), "Number of workers, default is 10");
+        ("worker,w", boost::program_options::value<int>(), "Number of workers, default is 10");
   }
 
   bool opts::parse(int argc, const char *argv[]) {
