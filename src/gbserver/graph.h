@@ -318,6 +318,10 @@ public:
         double tmp_score = i == src ? damping : 0.0;
 
         for (auto it = neighbors.cbegin(); it != neighbors.cend(); it++) {
+          if ((*it == dst && i == src) || (*it == src && i == dst)) { // skip direct connected edge
+            continue;
+          }
+          //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
           size_t deg = is_directed ? edges_ptr->get_edges(*it).get_out_deg() : edges_ptr->get_edges(*it).get_deg();
           tmp_score += (1 - damping) * old_score[*it] / deg;
         }
