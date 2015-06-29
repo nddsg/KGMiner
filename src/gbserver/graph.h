@@ -49,7 +49,7 @@ class graph {
                   std::vector<std::vector<unsigned int> > &result,
                   bool is_directed, bool depth_only) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back() == dst) {
-      if (!depth_only || (depth_only && tmp_path == max_depth)) {
+      if (!depth_only || (depth_only && tmp_path.size() == max_depth)) {
         result.push_back(tmp_path);
       }
       return;
