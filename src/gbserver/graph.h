@@ -340,6 +340,10 @@ public:
 
   }
 
+  double preferential_attachment(unsigned int id1, unsigned int id2) {
+    return edges_ptr->get_edges(id1).get_deg() * edges_ptr->get_edges(id2).get_deg();
+  }
+
 };
 
 #endif //GBPEDIA_GRAPH_H
