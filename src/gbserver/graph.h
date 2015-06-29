@@ -361,7 +361,7 @@ public:
    * [2]	D. Liben-Nowell and J. M. Kleinberg, “The link prediction problem for social networks.,”
    * CIKM, pp. 556–559, 2003.
    */
-  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.0005) {
+  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.05) {
     is_node_valid(id1);
     is_node_valid(id2);
     double score = 0;
