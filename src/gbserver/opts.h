@@ -15,6 +15,7 @@
     std::string type_filepath;
     int port = 8964;
     bool is_directed;
+    int nworker = 10;
 
   public:
     opts();
@@ -40,6 +41,10 @@
 
     bool getIs_directed() const {
       return is_directed;
+    }
+
+    int getNworker() const {
+      return nworker;
     }
 
   };

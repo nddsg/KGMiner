@@ -42,7 +42,7 @@ int main(int argc, const char *argv[]) {
 
   std::cout << "Graph constructed\n";
 
-  socket_server server;
+  socket_server server(options.getNworker());
   server.start("/tmp/gbserver", g);
 
   //TODO: Die gracefully.
