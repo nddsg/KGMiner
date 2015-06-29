@@ -5,9 +5,8 @@
 #include "opts.h"
 
 #include <iostream>
-#include <string>
 
-  opts::opts() : desc("Allowed options") {
+opts::opts() : desc("Allowed options") {
 
     std::string port_desc = "Port number, default is " + std::to_string(port);
 
@@ -21,7 +20,8 @@
          "EdgeTypeList filepath")
         ("directed,d", "Directed graph")
         ("port,p", boost::program_options::value<int>(),
-         port_desc.c_str());
+         port_desc.c_str())
+        ("worker,w", boost::program_options::value<int>(), "Number of workers, default is 10");
   }
 
   bool opts::parse(int argc, const char *argv[]) {
@@ -49,6 +49,9 @@
       }
       if (vm.count("port")) {
         port = vm["port"].as<int>();
+      }
+      if (vm.count("worker")) {
+        nworker = vm["worker"].as<int>();
       }
       is_directed = vm.count("directed") == 1;
     } catch (std::exception& err) {
