@@ -330,9 +330,9 @@ public:
         ppr_score[i] = tmp_score;
       }
 
-      std::cout << "iteration " << cnt << "done\n";
+      std::cout << "iteration " << cnt << " complete delta " << changes << "\n";
 
-      if (changes < delta) break;
+      if (changes <= delta) break;
       cnt++;
     }
 
