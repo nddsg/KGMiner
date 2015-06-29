@@ -13,6 +13,7 @@
 #include <set>
 #include <tuple>
 #include <algorithm>
+#include <cmath>
 
 template<typename ND, typename TD>
 class graph {
@@ -282,6 +283,56 @@ public:
     double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / edges_ptr->getMax_id();
 
     return maa * ndc;
+
+  }
+
+  /**
+   * [1]	T. H. Haveliwala, “Topic-sensitive pagerank,” presented at the WWW, 2002, pp. 517–526.
+   *
+   * Personalized PageRank
+   *
+   * TODO: May change to long double for more precise score.
+   */
+  double personalize_pagerank(unsigned int src, unsigned int dst, double damping = 0.15, double delta = 0.000001,
+                              int iter = 1000, bool is_directed = false) {
+
+    is_node_valid(src);
+    is_node_valid(dst);
+
+    std::vector<double> ppr_score(nodes_ptr->getMax_id() + 1, 0.0);
+    std::vector<double> old_score(nodes_ptr->getMax_id() + 1, 0.0);
+
+    // init score
+    ppr_score[src] = 0;
+    old_score[src] = 1;
+
+    int cnt = 0;
+    while (cnt < iter) { // run at most *iter* iterations
+      double changes = 0.0;
+
+      for (int i = 0; i < nodes_ptr->getMax_id() + 1; i++) {
+        // get score by adding up all neighbors
+        const std::set<uint> &neighbors = is_directed ? edges_ptr->get_edges(i).get_out_neighbors() :
+                                          edges_ptr->get_edges(i).get_neighbors();
+
+        double tmp_score = i == src ? damping : 0.0;
+
+        for (auto it = neighbors.cbegin(); it != neighbors.cend(); it++) {
+          size_t deg = is_directed ? edges_ptr->get_edges(*it).get_out_deg() : edges_ptr->get_edges(*it).get_deg();
+          tmp_score += (1 - damping) * old_score[*it] / deg;
+        }
+        changes += std::abs(old_score[i] - tmp_score); // changes between old score and new score
+        old_score[i] = ppr_score[i];
+        ppr_score[i] = tmp_score;
+      }
+
+      std::cout << "iteration " << cnt << "done\n";
+
+      if (changes < delta) break;
+      cnt++;
+    }
+
+    return ppr_score[dst];
 
   }
 

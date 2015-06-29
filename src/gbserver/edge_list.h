@@ -16,6 +16,13 @@ class edge_list {
   std::set< std::pair<uint, uint> > backward; /* Reversed edge for mimicking undirected graph */
   std::set<uint> in_neighbors;
   std::set<uint> out_neighbors;
+  std::set<uint> neighbors;
+
+  inline void construct_neighbors() {
+    neighbors.insert(in_neighbors.begin(), in_neighbors.end());
+    neighbors.insert(out_neighbors.begin(), out_neighbors.end());
+  }
+
 public:
 
   edge_list() : forward(std::set< std::pair<uint, uint> >()),
@@ -45,6 +52,12 @@ public:
 
   const std::set<uint> &get_out_neighbors()  noexcept { return out_neighbors; }
 
+  const std::set<uint> &get_neighbors() noexcept {
+    if (neighbors.size() < in_neighbors.size() || neighbors.size() < out_neighbors.size()) {
+      construct_neighbors();
+    }
+    return neighbors;
+  }
 
   inline size_t get_in_deg() noexcept {
     return in_neighbors.size();
@@ -55,7 +68,10 @@ public:
   }
 
   inline size_t get_deg() noexcept {
-    return get_in_deg() + get_out_deg();
+    if (neighbors.size() < in_neighbors.size() || neighbors.size() < out_neighbors.size()) {
+      construct_neighbors();
+    }
+    return neighbors.size();
   }
 
 };

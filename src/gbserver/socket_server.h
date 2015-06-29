@@ -142,6 +142,10 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           g.multidimensional_adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                                          (unsigned int) stoi(commands.at(3))));
 
+    } else if (commands.at(0) == "ppr") {
+      return_string = std::to_string(
+          g.personalize_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                                 0.15, 0.00001, 20, false));
     } else {
       return_string = "Unsupported command\n";
     }
