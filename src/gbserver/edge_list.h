@@ -18,11 +18,6 @@ class edge_list {
   std::set<uint> out_neighbors;
   std::set<uint> neighbors;
 
-  inline void construct_neighbors() {
-    neighbors.insert(in_neighbors.begin(), in_neighbors.end());
-    neighbors.insert(out_neighbors.begin(), out_neighbors.end());
-  }
-
 public:
 
   edge_list() : forward(std::set< std::pair<uint, uint> >()),
@@ -31,10 +26,12 @@ public:
   inline void connect_to(uint target, uint rel) {
     forward.insert(std::pair<uint, uint>(target, rel));
     out_neighbors.insert(target);
+    neighbors.insert(target);
   }
   inline void connected_by(uint source, uint rel) {
     backward.insert(std::pair<uint, uint>(source, rel));
     in_neighbors.insert(source);
+    neighbors.insert(source);
   }
   inline void disconnect_to(uint target, uint rel) {
     forward.erase(std::pair<uint, uint>(target, rel));
@@ -53,9 +50,6 @@ public:
   const std::set<uint> &get_out_neighbors()  noexcept { return out_neighbors; }
 
   const std::set<uint> &get_neighbors() noexcept {
-    if (neighbors.size() < in_neighbors.size() || neighbors.size() < out_neighbors.size()) {
-      construct_neighbors();
-    }
     return neighbors;
   }
 
@@ -68,9 +62,6 @@ public:
   }
 
   inline size_t get_deg() noexcept {
-    if (neighbors.size() < in_neighbors.size() || neighbors.size() < out_neighbors.size()) {
-      construct_neighbors();
-    }
     return neighbors.size();
   }
 
