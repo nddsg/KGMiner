@@ -340,8 +340,35 @@ public:
 
   }
 
+  /**
+   * [1]	A. L. Barabasi, H. Jeong, Z. Neda, E. Ravasz, A. Schubert, and T. Vicsek,
+   * “Evolution of the social network of scientific collaborations,” Physical review E, vol. cond-mat.soft. 09-Apr-2001.
+   *
+   */
   double preferential_attachment(unsigned int id1, unsigned int id2) {
+    is_node_valid(id1);
+    is_node_valid(id2);
     return edges_ptr->get_edges(id1).get_deg() * edges_ptr->get_edges(id2).get_deg();
+  }
+
+  /**
+   * [1]	L. Katz, “A new status index derived from sociometric analysis,”
+   * Psychometrika, vol. 18, no. 1, pp. 39–43, 1953.
+   *
+   * Default beta is based on
+   * [2]	D. Liben-Nowell and J. M. Kleinberg, “The link prediction problem for social networks.,”
+   * CIKM, pp. 556–559, 2003.
+   */
+  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.0005) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+    double score = 0;
+    for (int i = 3; i <=
+                    max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
+      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, max_length, false);
+      score += pow(beta, i) * paths.size();
+    }
+    return score;
   }
 
 };
