@@ -146,6 +146,13 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = std::to_string(
           g.personalize_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                                  0.15, 0.00001, 20, false));
+    } else if (commands.at(0) == "pa") {
+      return_string = std::to_string(g.preferential_attachment((unsigned int) stoi(commands.at(1)),
+                                                               (unsigned int) stoi(commands.at(2))));
+    } else if (commands.at(0) == "katz") {
+      return_string = std::to_string(
+          g.katz((unsigned int) stoi(commands.at(1)),
+                 (unsigned int) stoi(commands.at(2))));
     } else {
       return_string = "Unsupported command\n";
     }

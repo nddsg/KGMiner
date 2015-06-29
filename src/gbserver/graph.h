@@ -47,9 +47,11 @@ class graph {
                   std::vector<unsigned int> &tmp_path,
                   std::set<unsigned int> &visited,
                   std::vector<std::vector<unsigned int> > &result,
-                  bool is_directed) {
+                  bool is_directed, bool depth_only) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back() == dst) {
-      result.push_back(tmp_path);
+      if (!depth_only || (depth_only && tmp_path.size() == max_depth)) {
+        result.push_back(tmp_path);
+      }
       return;
     }
 
@@ -65,7 +67,7 @@ class graph {
          it != edges.get_forward().cend(); ++it) {
       if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) { // never visited
         tmp_path.push_back(it->first);
-        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed, depth_only);
         tmp_path.pop_back();
         visited.insert(it->first);
         if (it->first == dst) {
@@ -79,7 +81,7 @@ class graph {
            it != edges.get_backward().cend(); ++it) {
         if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) {
           tmp_path.push_back(it->first);
-          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed);
+          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed, depth_only);
           tmp_path.pop_back();
           visited.insert(it->first);
         }
@@ -164,7 +166,7 @@ public:
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
                                                           unsigned int dst,
                                                           unsigned int depth = 4,
-                                                          bool is_directed = true) {
+                                                          bool is_directed = true, bool depth_only = false) {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -175,7 +177,7 @@ public:
       std::set<unsigned int> visited;
       tmp_path.push_back(src);
       visited.insert(src);
-      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed);
+      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed, depth_only);
       assert(tmp_path.size() == 1); // only source node is in it.
     } catch (std::exception error) {
       std::cerr << "Error occurred when performing dfs, " << error.what() << std::endl;
@@ -338,6 +340,41 @@ public:
 
     return ppr_score[dst];
 
+  }
+
+  /**
+   * [1]	A. L. Barabasi, H. Jeong, Z. Neda, E. Ravasz, A. Schubert, and T. Vicsek,
+   * “Evolution of the social network of scientific collaborations,” Physical review E, vol. cond-mat.soft. 09-Apr-2001.
+   *
+   */
+  double preferential_attachment(unsigned int id1, unsigned int id2) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+    return edges_ptr->get_edges(id1).get_deg() * edges_ptr->get_edges(id2).get_deg();
+  }
+
+  /**
+   * [1]	L. Katz, “A new status index derived from sociometric analysis,”
+   * Psychometrika, vol. 18, no. 1, pp. 39–43, 1953.
+   *
+   * Default beta is based on
+   * [2]	D. Liben-Nowell and J. M. Kleinberg, “The link prediction problem for social networks.,”
+   * CIKM, pp. 556–559, 2003.
+   */
+  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.05) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+    double score = 0;
+    for (int i = 3; i <=
+                    max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
+      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, max_length, false, true);
+      double tmp_score = double(paths.size());
+      for (int j = 0; j < i; j++) {
+        tmp_score *= beta;
+      }
+      score += tmp_score;
+    }
+    return score;
   }
 
 };
