@@ -144,9 +144,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       oss << "\n";
       return_string = oss.str();
     } else if (commands.at(0) == "siblings") {
+      std::ostringstream oss;
       std::vector<std::pair<unsigned int, std::set<unsigned int> > > siblings =
           g.get_ontology_siblings((unsigned int) stoi(commands.at(1)));
-      std::ostringstream oss;
       if (commands.size() >= 3 && is_true(commands.at(2))) {
         for (auto it = siblings.begin(); it != siblings.end(); ++it) {
           oss << "[" << it->first << "]" << " ";
@@ -166,6 +166,24 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       oss << "\n";
       return_string = oss.str();
+    } else if (commands.at(0) == "nsiblings") {
+      std::ostringstream oss;
+      std::vector<std::pair<unsigned int, unsigned int> > res = g.get_ontology_sibling_count(
+          (unsigned int) stoi(commands.at(1)));
+
+      if (commands.size() >= 3 && is_true(commands.at(2))) {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << g.get_node_type(it->first) << "," << it->second << ";";
+        }
+      } else {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << it->first << "," << it->second << ";";
+        }
+      }
+
+      oss << "\n";
+      return_string = oss.str();
+
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
           g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));

@@ -188,6 +188,18 @@ public:
     return res;
   }
 
+  std::vector<std::pair<unsigned int, unsigned int> > get_ontology_sibling_count(unsigned int id) {
+    std::vector<std::pair<unsigned int, unsigned int> > res;
+
+    std::vector<unsigned int> node_ontology = get_ontology(id);
+    for (int i = 0; i < node_ontology.size(); i++) {
+      res.push_back(std::pair<unsigned int, unsigned int>(node_ontology[i],
+                                                          node_type_count[node_ontology[i]].second));
+    }
+
+    return res;
+  }
+
 };
 
 
