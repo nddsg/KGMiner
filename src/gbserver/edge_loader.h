@@ -18,11 +18,16 @@ private:
 
   std::vector<edge_list> edge_map;
   std::vector<unsigned int> edge_type_count;
+  std::map<unsigned int, std::pair<std::set<unsigned int>, unsigned int> > node_type_count;
   uint max_id, max_rel, nedges;
+
+  const unsigned int type_rel;
 
 public:
 
-  edge_loader(std::string edge_filepath, bool is_directed = false) : max_id(0), max_rel(0), nedges(0) {
+  //TODO: Automatically detect id of rel_type rdf-syntax-ns#type
+  edge_loader(std::string edge_filepath, bool is_directed = false, unsigned int type_rel = 671) :
+      max_id(0), max_rel(0), nedges(0), type_rel(type_rel) {
     std::fstream fin(edge_filepath, std::fstream::in);
 
     uint src, dst, rel;
@@ -35,7 +40,7 @@ public:
         edge_map.resize(std::max(src, dst) + 1u, edge_list());
       }
 
-      /* Log node count and edge count regarding to edge type */
+      /* Log edge count regarding to edge type */
       if (rel >= edge_type_count.size()) {
         edge_type_count.resize(rel + 1u, 0);
       }
@@ -49,6 +54,15 @@ public:
 
       if (max_id < std::max(src, dst)) max_id = std::max(src, dst);
       if (max_rel < rel) max_rel = rel;
+
+      /* Log type count when edge is A - type - B */
+      if (rel == type_rel) {
+        if (node_type_count.find(dst) == node_type_count.end()) {
+          node_type_count[dst] = std::pair<std::set<unsigned int>, unsigned int>();
+        }
+        node_type_count[dst].second++;
+        node_type_count[dst].first.insert(src);
+      }
 
       nedges++;
     }
@@ -142,6 +156,36 @@ public:
     }
 
     return common_neighbors;
+  }
+
+  std::vector<unsigned int> get_ontology(unsigned int id) {
+    std::vector<unsigned int> types;
+    std::set<std::pair<unsigned int, unsigned int> > &edges = get_edges(id).get_forward();
+    for (auto it = edges.begin(); it != edges.end(); ++it) {
+      if (it->second == type_rel) { // this is an ontology edge
+        types.push_back(it->first);
+      }
+    }
+
+    return types;
+  }
+
+  /**
+   * Return vertices sharing the same ontology set
+   *
+   * //TODO: pass const reference instead of value copy to save time and memory
+   */
+  std::vector<std::pair<unsigned int, std::set<unsigned int> > > get_ontology_siblings(unsigned int id) {
+
+    std::vector<std::pair<unsigned int, std::set<unsigned int> > > res;
+
+    std::vector<unsigned int> node_ontology = get_ontology(id);
+    for (int i = 0; i < node_ontology.size(); i++) {
+      res.push_back(std::pair<unsigned int, std::set<unsigned int> >(node_ontology[i],
+                                                                     node_type_count[node_ontology[i]].first));
+    }
+
+    return res;
   }
 
 };

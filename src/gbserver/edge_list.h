@@ -12,6 +12,7 @@
 #include <set>
 
 class edge_list {
+  /* Edge pairs are <node,rel>, the other endpoint is the index of the container */
   std::set< std::pair<uint, uint> > forward; /* Directed edge*/
   std::set< std::pair<uint, uint> > backward; /* Reversed edge for mimicking undirected graph */
   std::set<uint> in_neighbors;

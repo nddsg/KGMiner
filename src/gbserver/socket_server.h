@@ -17,6 +17,12 @@
 
 namespace local = boost::asio::local;
 
+bool is_true(const std::string &str) {
+  return str.compare("true") == 0 ||
+         str.compare("TRUE") == 0 ||
+         str.compare("T") == 0;
+}
+
 void worker(local::stream_protocol::socket *socket, graph<std::string, std::string> &g) {
   boost::array<char, 1024> buf;
   boost::system::error_code error;
@@ -44,14 +50,10 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
                                                                         (unsigned int) stoi(commands.at(2)),
                                                                         (unsigned int) stoi(commands.at(3)),
                                                                         commands.size() == 4 ||
-                                                                        (commands.at(4).compare("true") == 0 ||
-                                                                         commands.at(4).compare("TRUE") == 0 ||
-                                                                         commands.at(4).compare("T") == 0));
+                                                                        is_true(commands.at(4)));
 
       oss << "find " << paths.size() << " paths\n";
-      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
-                                   commands.at(5).compare("TRUE") == 0 ||
-                                   commands.at(5).compare("T") == 0)) {
+      if (commands.size() > 5 && is_true(commands.at(5))) {
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
             oss << g.get_node_type(*itt) << "--";
@@ -74,19 +76,14 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           (unsigned int) stoi(commands.at(1)),
           (unsigned int) stoi(commands.at(2)),
           (unsigned int) stoi(commands.at(3)),
-          commands.size() == 4 ||
-          (commands.at(4).compare("true") == 0 ||
-           commands.at(4).compare("TRUE") == 0 ||
-           commands.at(4).compare("T") == 0));
+          commands.size() == 4 || is_true(commands.at(4)));
 
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
       std::vector<std::vector<bool> > &rel_paths = hpaths.second;
 
       oss << "find " << paths.size() << " paths\n";
 
-      if (commands.size() > 5 && (commands.at(5).compare("true") == 0 ||
-                                   commands.at(5).compare("TRUE") == 0 ||
-                                   commands.at(5).compare("T") == 0)) {
+      if (commands.size() > 5 && is_true(commands.at(5))) {
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
@@ -128,6 +125,44 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       const std::set<unsigned int> &neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
       for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
         oss << *it << ",";
+      }
+      oss << "\n";
+      return_string = oss.str();
+    } else if (commands.at(0) == "ontology") {
+      std::vector<unsigned int> ontology = g.get_ontology((unsigned int) stoi(commands.at(1)));
+      std::ostringstream oss;
+      if (commands.size() >= 3 && is_true(commands.at(2))) {
+        for (auto it = ontology.begin(); it != ontology.end(); ++it) {
+          oss << g.get_node_type(*it) << ",";
+        }
+      } else {
+        for (auto it = ontology.begin(); it != ontology.end(); ++it) {
+          oss << *it << ",";
+        }
+      }
+
+      oss << "\n";
+      return_string = oss.str();
+    } else if (commands.at(0) == "siblings") {
+      std::vector<std::pair<unsigned int, std::set<unsigned int> > > siblings =
+          g.get_ontology_siblings((unsigned int) stoi(commands.at(1)));
+      std::ostringstream oss;
+      if (commands.size() >= 3 && is_true(commands.at(2))) {
+        for (auto it = siblings.begin(); it != siblings.end(); ++it) {
+          oss << "[" << it->first << "]" << " ";
+          for (auto itt = it->second.begin(); itt != it->second.end(); ++it) {
+            oss << g.get_node_type(*itt) << ",";
+          }
+          oss << "\n";
+        }
+      } else {
+        for (auto it = siblings.begin(); it != siblings.end(); ++it) {
+          oss << "[" << it->first << "]" << " ";
+          for (auto itt = it->second.begin(); itt != it->second.end(); ++it) {
+            oss << *itt << ",";
+          }
+          oss << "\n";
+        }
       }
       oss << "\n";
       return_string = oss.str();
