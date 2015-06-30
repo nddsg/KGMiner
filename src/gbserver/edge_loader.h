@@ -76,6 +76,24 @@ public:
     return rel_type == 0 ? getMax_id() : edge_type_count.at(rel_type);
   }
 
+  std::set<std::pair<unsigned int, unsigned int> > get_neighbors_except_rel(unsigned int id, unsigned int rel_type = 0,
+                                                                            bool is_directed = false) {
+    std::set<std::pair<unsigned int, unsigned int> > neighbors;
+    for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
+      if (rel_type != it->second) {
+        neighbors.insert(*it);
+      }
+    }
+    if (!is_directed) {
+      for (auto it = get_edges(id).get_backward().cbegin(); it != get_edges(id).get_backward().cend(); ++it) {
+        if (rel_type != it->second) {
+          neighbors.insert(*it);
+        }
+      }
+    }
+    return neighbors;
+  }
+
   std::set<unsigned int> get_neighbors(unsigned int id, unsigned int rel_type = 0, bool is_directed = false) {
     std::set<unsigned int> neighbors;
     for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
@@ -91,6 +109,23 @@ public:
       }
     }
     return neighbors;
+  }
+
+  std::vector<std::pair<unsigned int, unsigned int> > get_common_neighbor_except_rel(unsigned int id1, unsigned int id2,
+                                                                                     unsigned int rel_type = 0,
+                                                                                     bool is_directed = false) {
+    std::set<std::pair<unsigned int, unsigned int> > neighbors_1 = get_neighbors_except_rel(id1, rel_type, is_directed);
+    std::set<std::pair<unsigned int, unsigned int> > neighbors_2 = get_neighbors_except_rel(id2, rel_type, is_directed);
+
+    std::vector<std::pair<unsigned int, unsigned int> > common_neighbors;
+
+    for (auto it = neighbors_1.cbegin(); it != neighbors_1.cend(); ++it) {
+      if (neighbors_2.find(*it) != neighbors_2.end()) {
+        common_neighbors.push_back(*it);
+      }
+    }
+
+    return common_neighbors;
   }
 
   std::vector<unsigned int> get_common_neighbor(unsigned int id1, unsigned int id2, unsigned int rel_type = 0,

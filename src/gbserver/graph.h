@@ -282,10 +282,39 @@ public:
 
     double maa = adamic_adar(id1, id2, rel_type);
 
-    double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / edges_ptr->getMax_id();
+    double ndc = double(edges_ptr->get_edge_type_count(rel_type)) / edges_ptr->getNedges();
 
     return maa * ndc;
 
+  }
+
+
+  /**
+   * Heterogeneous Adamic Adar
+   *
+   * Instead of calculating common neighbors, we calculate common edge relations.
+   * First we find the number of common relations, then we sum up \frac{#rel in the same node}{}
+   *
+   * sum(#Rel / #Edges)
+   *
+   */
+  double heter_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type) {
+    is_node_valid(id1);
+    is_node_valid(id2);
+
+    std::vector<std::pair<unsigned int, unsigned int> > common_neighbors = edges_ptr->get_common_neighbor_except_rel(
+        id1, id2, rel_type, false);
+
+    double result = 0.0;
+
+    for (auto it = common_neighbors.cbegin(); it != common_neighbors.cend(); ++it) {
+      size_t degree = edges_ptr->get_edges(it->first).get_deg();
+      double ndc = double(edges_ptr->get_edge_type_count(it->second)) / edges_ptr->getNedges();
+      result += 1.0 / log(degree) * ndc;
+    }
+
+
+    return result;
   }
 
   /**

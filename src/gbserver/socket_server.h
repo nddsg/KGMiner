@@ -134,6 +134,10 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
           g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+    } else if (commands.at(0) == "haa") {
+      return_string = std::to_string(
+          g.heter_adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                              (unsigned int) stoi(commands.at(3))));
     } else if (commands.at(0) == "sp") {
       return_string = std::to_string(
           g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
