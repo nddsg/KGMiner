@@ -406,6 +406,21 @@ public:
     return score;
   }
 
+  inline std::vector<unsigned int> get_ontology(unsigned int id) {
+    is_node_valid(id);
+    return edges_ptr->get_ontology(id);
+  }
+
+  inline std::vector<std::pair<unsigned int, std::set<unsigned int> > > get_ontology_siblings(unsigned int id) {
+    is_node_valid(id);
+    return edges_ptr->get_ontology_siblings(id);
+  }
+
+  inline std::vector<std::pair<unsigned int, unsigned int> > get_ontology_sibling_count(unsigned int id) {
+    is_node_valid(id);
+    return edges_ptr->get_ontology_sibling_count(id);
+  }
+
 };
 
 #endif //GBPEDIA_GRAPH_H
