@@ -312,7 +312,7 @@ public:
       std::vector<std::pair<unsigned int, unsigned int> > ontology = get_ontology_sibling_count(it->first);
 
       int ontology_sum = 0;
-      for (auto itt = ontology.begin(); it != ontology.end(); ++it) {
+      for (auto itt = ontology.begin(); itt != ontology.end(); ++itt) {
         ontology_sum += 1 / (double) itt->second; // the larger the score is, the rarer the ontology will be.
       }
       result += 1.0 / log(degree) * ontology_sum;
