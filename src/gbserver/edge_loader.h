@@ -200,6 +200,12 @@ public:
     return res;
   }
 
+  unsigned int get_ontology_count(unsigned int id) {
+    return node_type_count[id].second;
+  }
+
+  inline unsigned int get_type_rel() { return type_rel; }
+
 };
 
 

@@ -308,16 +308,12 @@ public:
     double result = 0.0;
 
     for (auto it = common_neighbors.cbegin(); it != common_neighbors.cend(); ++it) {
-      size_t degree = edges_ptr->get_edges(it->first).get_deg();
-      std::vector<std::pair<unsigned int, unsigned int> > ontology = get_ontology_sibling_count(it->first);
 
-      int ontology_sum = 0;
-      for (auto itt = ontology.begin(); itt != ontology.end(); ++itt) {
-        ontology_sum += 1 / (double) itt->second; // the larger the score is, the rarer the ontology will be.
+      if (it->second == edges_ptr->get_type_rel()) {
+        size_t degree = edges_ptr->get_ontology_count(it->first);
+        result += 1.0 / log(degree);
       }
-      result += 1.0 / log(degree) * ontology_sum;
     }
-
 
     return result;
   }
