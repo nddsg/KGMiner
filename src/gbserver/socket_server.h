@@ -119,7 +119,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-            oss << (!rel_paths.at(path_id).at(path_pos) ? 1 : -1) * itt->second << "-";
+            oss << (!rel_paths.at(path_id).at(path_pos) ? 1 : -1) * long(itt->second) << ",";
             path_pos++;
           }
           path_id++;
