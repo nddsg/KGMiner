@@ -308,11 +308,12 @@ public:
     double result = 0.0;
 
     for (auto it = common_neighbors.cbegin(); it != common_neighbors.cend(); ++it) {
-      size_t degree = edges_ptr->get_edges(it->first).get_deg();
-      double ndc = double(edges_ptr->get_edge_type_count(it->second)) / edges_ptr->getNedges();
-      result += 1.0 / log(degree) * ndc;
-    }
 
+      if (it->second == edges_ptr->get_type_rel()) {
+        size_t degree = edges_ptr->get_ontology_count(it->first);
+        result += 1.0 / log(degree);
+      }
+    }
 
     return result;
   }

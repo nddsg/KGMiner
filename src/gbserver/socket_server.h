@@ -23,6 +23,12 @@ bool is_true(const std::string &str) {
          str.compare("T") == 0;
 }
 
+bool is_false(const std::string &str) {
+  return str.compare("false") == 0 ||
+         str.compare("FALSE") == 0 ||
+         str.compare("F") == 0;
+}
+
 void worker(local::stream_protocol::socket *socket, graph<std::string, std::string> &g) {
   boost::array<char, 1024> buf;
   boost::system::error_code error;
@@ -96,13 +102,24 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           oss << std::endl;
           path_id++;
         }
-      } else {
+      } else if (is_false(commands.at(5))) {
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << commands.at(1) << "-";
           path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
             oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << itt->second << ")-" << itt->first << "-";
+            path_pos++;
+          }
+          path_id++;
+          oss << std::endl;
+        }
+      } else {
+        size_t path_id = 0, path_pos = 0;
+        for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
+          path_pos = 0;
+          for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
+            oss << (!rel_paths.at(path_id).at(path_pos) ? 1 : -1) * long(itt->second) << ",";
             path_pos++;
           }
           path_id++;
