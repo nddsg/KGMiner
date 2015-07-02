@@ -89,7 +89,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
       oss << "find " << paths.size() << " paths\n";
 
-      if (commands.size() > 5 && is_true(commands.at(5))) {
+      if (commands.size() > 5 && is_true(commands.at(5))) { // semantic path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
@@ -102,7 +102,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           oss << std::endl;
           path_id++;
         }
-      } else if (is_false(commands.at(5))) {
+      } else if (is_false(commands.at(5))) { // raw path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << commands.at(1) << "-";
@@ -114,7 +114,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           path_id++;
           oss << std::endl;
         }
-      } else {
+      } else { // rel path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           path_pos = 0;
