@@ -422,6 +422,27 @@ public:
     return edges_ptr->get_ontology_sibling_count(id);
   }
 
+
+  bool connected_by(unsigned int src, unsigned int dst, unsigned int link_type, bool is_directed = false) {
+    is_node_valid(src);
+    is_node_valid(dst);
+
+    std::set<std::pair<uint, uint> > edges = edges_ptr->get_edges(src).get_forward();
+
+    for (auto it = edges.begin(); it != edges.end(); ++it) {
+      if (it->first == dst && it->second == link_type) return true;
+    }
+
+    if (!is_directed) {
+      edges = edges_ptr->get_edges(src).get_backward();
+      for (auto it = edges.begin(); it != edges.end(); ++it) {
+        if (it->first == dst && it->second == link_type) return true;
+      }
+    }
+
+    return false;
+  }
+
 };
 
 #endif //GBPEDIA_GRAPH_H

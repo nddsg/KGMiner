@@ -50,6 +50,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   try {
     if (commands.size() == 0) {
       return_string = "No command provided\n";
+
+// HOMOGENEOUS PATH
     } else if (commands.at(0).compare("path") == 0) {
       std::ostringstream oss;
       std::vector<std::vector<unsigned int> > paths = g.homogeneous_dfs((unsigned int) stoi(commands.at(1)),
@@ -76,6 +78,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       return_string = oss.str();
 
+// HETEROGENEOUS PATH
     } else if (commands.at(0).compare("hpath") == 0) {
       std::ostringstream oss;
       std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
@@ -129,6 +132,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
       return_string = oss.str();
 
+// SOURCE ENTITIES
     } else if (commands.at(0) == "in_neighbor") {
       std::ostringstream oss;
       const std::set<unsigned int> &neighbors = g.get_in_edges((unsigned int) stoi(commands.at(1)));
@@ -137,6 +141,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       oss << "\n";
       return_string = oss.str();
+
+// DEST ENTITIES
     } else if (commands.at(0) == "out_neighbor") {
       std::ostringstream oss;
       const std::set<unsigned int> &neighbors = g.get_out_edges((unsigned int) stoi(commands.at(1)));
@@ -145,6 +151,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       oss << "\n";
       return_string = oss.str();
+
+// ONTOLOGIES THAT ENTITY BELONGS TO
     } else if (commands.at(0) == "ontology") {
       std::vector<unsigned int> ontology = g.get_ontology((unsigned int) stoi(commands.at(1)));
       std::ostringstream oss;
@@ -160,6 +168,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
       oss << "\n";
       return_string = oss.str();
+
+// ENTITIES SHARING AT LEAST ONE ONTOLOGY WITH GIVEN ENTITY
     } else if (commands.at(0) == "siblings") {
       std::ostringstream oss;
       std::vector<std::pair<unsigned int, std::set<unsigned int> > > siblings =
@@ -183,6 +193,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       oss << "\n";
       return_string = oss.str();
+
+// NUMBER OF ENTITIES SHARING AT LEAST ONE ONTOLOGY WITH GIVEN ENTITY
     } else if (commands.at(0) == "nsiblings") {
       std::ostringstream oss;
       std::vector<std::pair<unsigned int, unsigned int> > res = g.get_ontology_sibling_count(
@@ -201,32 +213,50 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       oss << "\n";
       return_string = oss.str();
 
+// ADAMIC ADAR
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
           g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+
+// HETEROGENEOUS ADAMIC ADAR
     } else if (commands.at(0) == "haa") {
       return_string = std::to_string(
           g.heter_adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                               (unsigned int) stoi(commands.at(3))));
+
+// SEMANTIC PROXIMITY
     } else if (commands.at(0) == "sp") {
       return_string = std::to_string(
           g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+
+// MULTI_DIMENSIONAL ADAMIC ADAR
     } else if (commands.at(0) == "maa") {
       return_string = std::to_string(
           g.multidimensional_adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                                          (unsigned int) stoi(commands.at(3))));
 
+// PERSONALIZED PAGERANK
     } else if (commands.at(0) == "ppr") {
       return_string = std::to_string(
           g.personalize_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                                  0.15, 0.00001, 20, false));
+
+// PREFERENTIAL ATTACHMENT
     } else if (commands.at(0) == "pa") {
       return_string = std::to_string(g.preferential_attachment((unsigned int) stoi(commands.at(1)),
                                                                (unsigned int) stoi(commands.at(2))));
+
+// KATZ
     } else if (commands.at(0) == "katz") {
       return_string = std::to_string(
           g.katz((unsigned int) stoi(commands.at(1)),
                  (unsigned int) stoi(commands.at(2))));
+
+// CHECK IF TWO NODE CONNECTED BY CERTAIN LINK_TYPE
+    } else if (commands.at(0) == "connectedby") {
+      return_string = std::to_string(g.connected_by((unsigned int) stoi(commands.at(1)),
+                                                    (unsigned int) stoi(commands.at(2)),
+                                                    (unsigned int) stoi(commands.at(3))));
     } else {
       return_string = "Unsupported command\n";
     }
