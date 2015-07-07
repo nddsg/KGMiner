@@ -277,7 +277,11 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           (unsigned int) stoi(commands.at(3)));
       std::ostringstream oss;
       for (auto it = true_labeled_pairs.cbegin(); it != true_labeled_pairs.cend(); ++it) {
-        oss << it->first << "," << it->second << "\n";
+        if (commands.size() >= 5 && is_true(commands.at(4))) {
+          oss << g.get_node_type(it->first) << "\t" << g.get_node_type(it->second) << "\n";
+        } else {
+          oss << it->first << "\t" << it->second << "\n";
+        }
       }
       return_string = oss.str();
     } else {
