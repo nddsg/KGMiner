@@ -450,7 +450,7 @@ public:
   }
 
   //TODO: This function iterates through entire edge list to find qualified entity pairs, try cache this
-  std::vector<std::pair<unsigned int, unsigned int> > get_entitiy_pairs_by_rel(unsigned int rel_type,
+  std::vector<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_rel(unsigned int rel_type,
                                                                                double sample_rate = 0.1) {
 
     srand(233);
@@ -468,22 +468,45 @@ public:
     return res;
   }
 
-  std::vector<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
+  std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
                                                                                  unsigned int rel_type,
                                                                                  double sample_rate = 0.1) {
     is_node_valid(src);
     is_node_valid(dst);
     srand(233);
 
-    // Step 1: Get ontology of src and dst
+    // Step 1: Get src_set and dst_set that matches src and dst's ontology
 
-    std::set<unsigned int> src_set = edges_ptr->get_ontology_siblings(src, 0.0);
-    std::set<unsigned int> dst_set = edges_ptr->get_ontology_siblings(dst, 0.0);
+    std::set<unsigned int> src_set = get_ontology_siblings(src, 0.0);
+    std::set<unsigned int> dst_set = get_ontology_siblings(dst, 0.0);
 
     //std::set<unsigned int> src_ontology = edges_ptr->get_ontology_set(src);
     //std::set<unsigned int> dst_ontology = edges_ptr->get_ontology_set(dst);
 
-    // Step 2: Get most similar ontology pairs regarding to an association rule like score.
+    // Step 2: Get true labeled node pairs from previous sets
+
+    std::set<std::pair<unsigned int, unsigned int> > true_pairs;
+
+    for (auto it = src_set.cbegin(); it != src_set.cend(); ++it) {
+      auto edges = edges_ptr->get_edges(*it).get_forward();
+      for (auto p = edges.cbegin(); p != edges.cend(); ++p) {
+        if (p->second == rel_type && dst_set.find(p->first) != dst_set.end()) { // rel match and dst is in the set
+          true_pairs.insert(std::pair<unsigned int, unsigned int>(*it, p->first));
+        }
+      }
+    }
+
+    for (auto it = dst_set.cbegin(); it != dst_set.cend(); ++it) {
+      auto edges = edges_ptr->get_edges(*it).get_backward();
+      for (auto p = edges.cbegin(); p != edges.cend(); ++p) {
+        if (p->second == rel_type && src_set.find(p->first) != src_set.end()) { // rel match and src is in the set
+          true_pairs.insert(std::pair<unsigned int, unsigned int>(p->first, *it));
+        }
+      }
+    }
+
+    return true_pairs;
+
   }
 
 };

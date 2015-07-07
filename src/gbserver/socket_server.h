@@ -270,6 +270,16 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = std::to_string(g.connected_by((unsigned int) stoi(commands.at(1)),
                                                     (unsigned int) stoi(commands.at(2)),
                                                     (unsigned int) stoi(commands.at(3))));
+    } else if (commands.at(0) == "truelabeled") {
+      std::set<std::pair<unsigned int, unsigned int> > true_labeled_pairs = g.get_entity_pairs_by_triple(
+          (unsigned int) stoi(commands.at(1)),
+          (unsigned int) stoi(commands.at(2)),
+          (unsigned int) stoi(commands.at(3)));
+      std::ostringstream oss;
+      for (auto it = true_labeled_pairs.cbegin(); it != true_labeled_pairs.cend(); ++it) {
+        oss << it->first << "," << it->second << "\n";
+      }
+      return_string = oss.str();
     } else {
       return_string = "Unsupported command\n";
     }
