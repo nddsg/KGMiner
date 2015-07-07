@@ -13,6 +13,7 @@
 #include <set>
 #include <tuple>
 #include <algorithm>
+#include <cstdlib>
 #include <cmath>
 
 template<typename ND, typename TD>
@@ -417,6 +418,11 @@ public:
     return edges_ptr->get_ontology_siblings(id);
   }
 
+  inline std::set<unsigned int> get_ontology_siblings(unsigned int id, double tol) {
+    is_node_valid(id);
+    return edges_ptr->get_ontology_siblings(id, tol);
+  }
+
   inline std::vector<std::pair<unsigned int, unsigned int> > get_ontology_sibling_count(unsigned int id) {
     is_node_valid(id);
     return edges_ptr->get_ontology_sibling_count(id);
@@ -441,6 +447,43 @@ public:
     }
 
     return false;
+  }
+
+  //TODO: This function iterates through entire edge list to find qualified entity pairs, try cache this
+  std::vector<std::pair<unsigned int, unsigned int> > get_entitiy_pairs_by_rel(unsigned int rel_type,
+                                                                               double sample_rate = 0.1) {
+
+    srand(233);
+
+    std::vector<std::pair<unsigned int, unsigned int> > res;
+    for (unsigned int i = nodes_ptr->getMin_id(); i <= nodes_ptr->getMax_id(); i++) {
+      edge_list &edges = edges_ptr->get_edges(i);
+      for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+        if (it->second == rel_type && ((double) rand() / RAND_MAX <= sample_rate)) {
+          res.push_back(std::pair<unsigned int, unsigned int>(i, it->first));
+        }
+      }
+    }
+
+    return res;
+  }
+
+  std::vector<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
+                                                                                 unsigned int rel_type,
+                                                                                 double sample_rate = 0.1) {
+    is_node_valid(src);
+    is_node_valid(dst);
+    srand(233);
+
+    // Step 1: Get ontology of src and dst
+
+    std::set<unsigned int> src_set = edges_ptr->get_ontology_siblings(src, 0.0);
+    std::set<unsigned int> dst_set = edges_ptr->get_ontology_siblings(dst, 0.0);
+
+    //std::set<unsigned int> src_ontology = edges_ptr->get_ontology_set(src);
+    //std::set<unsigned int> dst_ontology = edges_ptr->get_ontology_set(dst);
+
+    // Step 2: Get most similar ontology pairs regarding to an association rule like score.
   }
 
 };

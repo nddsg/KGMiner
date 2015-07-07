@@ -9,6 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 template <typename T> class node_loader {
 
@@ -18,10 +19,11 @@ public:
 private:
   std::vector<value_type> node_map;
   unsigned int max_id;
+  unsigned int min_id;
 
 public:
 
-  node_loader(std::string node_filepath) noexcept : max_id(0), node_map(std::vector<value_type>()) {
+  node_loader(std::string node_filepath) noexcept : max_id(0), min_id(0), node_map(std::vector<value_type>()) {
 
     std::fstream fin(node_filepath, std::fstream::in);
 
@@ -38,18 +40,23 @@ public:
       }
       node_map[id] = val;
 
-      if (max_id < id) max_id = id;
+      max_id = std::max(max_id, id);
+      min_id = std::min(min_id, id);
     }
 
     fin.close();
   };
 
   bool exists(unsigned int id) const noexcept {
-    return id <= max_id;
+    return (id <= max_id) && (id >= min_id);
   }
 
   unsigned int getMax_id() const noexcept {
     return max_id;
+  }
+
+  unsigned int getMin_id() const noexcept {
+    return min_id;
   }
 
   value_type get_value(unsigned int id) const {
