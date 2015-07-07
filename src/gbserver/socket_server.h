@@ -169,6 +169,19 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       oss << "\n";
       return_string = oss.str();
 
+// ENTITIES THAT EXACT MATCH THE INPUT NODE
+    } else if (commands.at(0) == "esiblings") {
+      std::ostringstream oss;
+      auto siblings = g.get_ontology_siblings((unsigned int) stoi(commands.at(1)), 0.0);
+      for (auto it = siblings.cbegin(); it != siblings.cend(); ++it) {
+        if (commands.size() >= 3 && is_true(commands.at(2))) {
+          oss << g.get_node_type(*it) << ",";
+        } else {
+          oss << *it << ",";
+        }
+      }
+      oss << "\n";
+      return_string = oss.str();
 // ENTITIES SHARING AT LEAST ONE ONTOLOGY WITH GIVEN ENTITY
     } else if (commands.at(0) == "siblings") {
       std::ostringstream oss;
@@ -257,6 +270,20 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = std::to_string(g.connected_by((unsigned int) stoi(commands.at(1)),
                                                     (unsigned int) stoi(commands.at(2)),
                                                     (unsigned int) stoi(commands.at(3))));
+    } else if (commands.at(0) == "truelabeled") {
+      std::set<std::pair<unsigned int, unsigned int> > true_labeled_pairs = g.get_entity_pairs_by_triple(
+          (unsigned int) stoi(commands.at(1)),
+          (unsigned int) stoi(commands.at(2)),
+          (unsigned int) stoi(commands.at(3)));
+      std::ostringstream oss;
+      for (auto it = true_labeled_pairs.cbegin(); it != true_labeled_pairs.cend(); ++it) {
+        if (commands.size() >= 5 && is_true(commands.at(4))) {
+          oss << g.get_node_type(it->first) << "\t" << g.get_node_type(it->second) << "\n";
+        } else {
+          oss << it->first << "\t" << it->second << "\n";
+        }
+      }
+      return_string = oss.str();
     } else {
       return_string = "Unsupported command\n";
     }

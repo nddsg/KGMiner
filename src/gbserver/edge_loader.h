@@ -170,6 +170,18 @@ public:
     return types;
   }
 
+  std::set<unsigned int> get_ontology_set(unsigned int id) {
+    std::set<unsigned int> types;
+    std::set<std::pair<unsigned int, unsigned int> > &edges = get_edges(id).get_forward();
+    for (auto it = edges.begin(); it != edges.end(); ++it) {
+      if (it->second == type_rel) { // this is an ontology edge
+        types.insert(it->first);
+      }
+    }
+
+    return types;
+  }
+
   /**
    * Return vertices sharing the same ontology set
    *
@@ -183,6 +195,25 @@ public:
     for (int i = 0; i < node_ontology.size(); i++) {
       res.push_back(std::pair<unsigned int, std::set<unsigned int> >(node_ontology[i],
                                                                      node_type_count[node_ontology[i]].first));
+    }
+
+    return res;
+  }
+
+  //TODO: Implement tol based filtering
+  std::set<unsigned int> get_ontology_siblings(unsigned int id, double tol) {
+
+    std::set<unsigned int> res;
+
+    std::set<unsigned int> ontology = get_ontology_set(id);
+
+    for (auto it_ontology = ontology.cbegin(); it_ontology != ontology.cend(); ++it_ontology) {
+      for (auto it_entity = node_type_count[*it_ontology].first.cbegin();
+           it_entity != node_type_count[*it_ontology].first.cend(); ++it_entity) {
+        if (ontology == get_ontology_set(*it_entity)) {
+          res.insert(*it_entity);
+        }
+      }
     }
 
     return res;
