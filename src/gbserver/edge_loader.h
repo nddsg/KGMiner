@@ -211,7 +211,6 @@ public:
       for (auto it_entity = node_type_count[*it_ontology].first.cbegin();
            it_entity != node_type_count[*it_ontology].first.cend(); ++it_entity) {
         if (ontology == get_ontology_set(*it_entity)) {
-          std::cout << *it_entity << " is an exact match\n";
           res.insert(*it_entity);
         }
       }
