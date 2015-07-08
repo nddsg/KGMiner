@@ -468,9 +468,23 @@ public:
     return res;
   }
 
-  std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
+  inline std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
+                                                                                     unsigned int rel_type,
+                                                                                     double sample_rate = 0.1) {
+    return get_entity_pairs_by_triple_helper(src, dst, rel_type, sample_rate, false);
+  }
+
+  inline std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_without_rel(unsigned int src,
+                                                                                       unsigned int dst,
+                                                                                       unsigned int rel_type,
+                                                                                       double sample_rate = 0.1) {
+    return get_entity_pairs_by_triple_helper(src, dst, rel_type, sample_rate, true);
+  }
+
+  std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple_helper(unsigned int src, unsigned int dst,
                                                                                  unsigned int rel_type,
-                                                                                 double sample_rate = 0.1) {
+                                                                                     double sample_rate = 0.1,
+                                                                                     bool exclude_rel = false) {
     is_node_valid(src);
     is_node_valid(dst);
     srand(233);
@@ -480,18 +494,22 @@ public:
     std::set<unsigned int> src_set = get_ontology_siblings(src, 0.0);
     std::set<unsigned int> dst_set = get_ontology_siblings(dst, 0.0);
 
-    //std::set<unsigned int> src_ontology = edges_ptr->get_ontology_set(src);
-    //std::set<unsigned int> dst_ontology = edges_ptr->get_ontology_set(dst);
-
     // Step 2: Get true labeled node pairs from previous sets
 
-    std::set<std::pair<unsigned int, unsigned int> > true_pairs;
+    std::set<std::pair<unsigned int, unsigned int> > entity_pairs;
+    std::set<std::pair<unsigned int, unsigned int> > entity_pairs_with_rel;
 
     for (auto it = src_set.cbegin(); it != src_set.cend(); ++it) {
       auto edges = edges_ptr->get_edges(*it).get_forward();
       for (auto p = edges.cbegin(); p != edges.cend(); ++p) {
-        if (p->second == rel_type && dst_set.find(p->first) != dst_set.end()) { // rel match and dst is in the set
-          true_pairs.insert(std::pair<unsigned int, unsigned int>(*it, p->first));
+        if (!exclude_rel) { // get all entity pairs with rel_type
+          if (p->second == rel_type && dst_set.find(p->first) != dst_set.end()) { // rel match and dst is in the set
+            entity_pairs_with_rel.insert(std::pair<unsigned int, unsigned int>(*it, p->first));
+          }
+        } else { // get all entity pairs without rel_type
+          if (p->second != rel_type && dst_set.find(p->first) != dst_set.end()) {
+            entity_pairs.insert(std::pair<unsigned int, unsigned int>(*it, p->first));
+          }
         }
       }
     }
@@ -499,13 +517,29 @@ public:
     for (auto it = dst_set.cbegin(); it != dst_set.cend(); ++it) {
       auto edges = edges_ptr->get_edges(*it).get_backward();
       for (auto p = edges.cbegin(); p != edges.cend(); ++p) {
-        if (p->second == rel_type && src_set.find(p->first) != src_set.end()) { // rel match and src is in the set
-          true_pairs.insert(std::pair<unsigned int, unsigned int>(p->first, *it));
+        if (!exclude_rel) {
+          if (p->second == rel_type && src_set.find(p->first) != src_set.end()) { // rel match and src is in the set
+            entity_pairs_with_rel.insert(std::pair<unsigned int, unsigned int>(p->first, *it));
+          }
+        } else { // get all entity pairs that matching the given ontology but no rel_type
+          if (p->second != rel_type && src_set.find(p->first) != src_set.end()) {
+            entity_pairs.insert(std::pair<unsigned int, unsigned int>(p->first, *it));
+          }
         }
+
       }
     }
 
-    return true_pairs;
+    if (!exclude_rel) return entity_pairs_with_rel;
+
+    for (auto it = entity_pairs_with_rel.cbegin(); it != entity_pairs_with_rel.cend(); ++it) {
+      auto p = entity_pairs.find(*it);
+      if (p != entity_pairs.end()) {
+        entity_pairs.erase(p);
+      }
+    }
+    
+    return entity_pairs;
 
   }
 
