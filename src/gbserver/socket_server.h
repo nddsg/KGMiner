@@ -284,6 +284,20 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
         }
       }
       return_string = oss.str();
+    } else if (commands.at(0) == "falselabeled") {
+      std::set<std::pair<unsigned int, unsigned int> > true_labeled_pairs = g.get_entity_pairs_without_rel(
+          (unsigned int) stoi(commands.at(1)),
+          (unsigned int) stoi(commands.at(2)),
+          (unsigned int) stoi(commands.at(3)));
+      std::ostringstream oss;
+      for (auto it = true_labeled_pairs.cbegin(); it != true_labeled_pairs.cend(); ++it) {
+        if (commands.size() >= 5 && is_true(commands.at(4))) {
+          oss << g.get_node_type(it->first) << "\t" << g.get_node_type(it->second) << "\n";
+        } else {
+          oss << it->first << "\t" << it->second << "\n";
+        }
+      }
+      return_string = oss.str();
     } else {
       return_string = "Unsupported command\n";
     }
