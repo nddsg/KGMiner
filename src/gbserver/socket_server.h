@@ -132,6 +132,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
       return_string = oss.str();
 
+    } else if (commands.at(0) == "edgecount") {
+      return_string = std::to_string(g.get_edge_type_count((unsigned int) stoi(commands.at(1))));
+
 // SOURCE ENTITIES
     } else if (commands.at(0) == "in_neighbor") {
       std::ostringstream oss;
