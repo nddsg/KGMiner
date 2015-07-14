@@ -229,6 +229,21 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       oss << "\n";
       return_string = oss.str();
 
+    } else if (commands.at(0) == "neighborwithrel") {
+      std::ostringstream oss;
+      std::set<unsigned int> res = g.get_neighbor_by_rel((unsigned int) stoi(commands.at(1)),
+                                                         (unsigned int) stoi(commands.at(2)));
+      if (commands.size() >= 4 && is_true(commands.at(3))) {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << g.get_node_type(*it) << ",";
+        }
+      } else {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << *it << ",";
+        }
+      }
+      oss << "\n";
+      return_string = oss.str();
 // ADAMIC ADAR
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
