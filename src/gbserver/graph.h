@@ -538,9 +538,13 @@ public:
         entity_pairs.erase(p);
       }
     }
-    
+
     return entity_pairs;
 
+  }
+
+  inline unsigned int get_edge_type_count(unsigned int rel_type) {
+    return edges_ptr->get_edge_type_count(rel_type);
   }
 
 };
