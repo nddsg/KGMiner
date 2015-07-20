@@ -90,7 +90,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
       std::vector<std::vector<bool> > &rel_paths = hpaths.second;
 
-      //oss << "find " << paths.size() << " paths\n";
+      oss << "find " << paths.size() << " paths\n";
 
       if (commands.size() > 5 && is_true(commands.at(5))) { // semantic path
         size_t path_id = 0, path_pos = 0;
