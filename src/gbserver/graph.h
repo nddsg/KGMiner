@@ -338,7 +338,7 @@ public:
 
     scores[""] = std::vector<double>(nodes_ptr->getMax_id() + 1, 1.0 / nodes_ptr->getMax_id());
 
-    //
+    // get path list from h_path function
 
   }
 
@@ -456,15 +456,15 @@ public:
     is_node_valid(src);
     is_node_valid(dst);
 
-    std::set<std::pair<uint, uint> > edges = edges_ptr->get_edges(src).get_forward();
+    std::set<std::pair<uint, uint> > &edges = edges_ptr->get_edges(src).get_forward();
 
-    for (auto it = edges.begin(); it != edges.end(); ++it) {
+    for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
       if (it->first == dst && it->second == link_type) return true;
     }
 
     if (!is_directed) {
       edges = edges_ptr->get_edges(src).get_backward();
-      for (auto it = edges.begin(); it != edges.end(); ++it) {
+      for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
         if (it->first == dst && it->second == link_type) return true;
       }
     }
