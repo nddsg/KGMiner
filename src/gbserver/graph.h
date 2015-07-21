@@ -465,7 +465,7 @@ public:
     if (!is_directed) {
       edges = edges_ptr->get_edges(src).get_backward();
       for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
-        if (it->first == dst && it->second == link_type) return true;
+        if (it->first == src && it->second == link_type) return true;
       }
     }
 
