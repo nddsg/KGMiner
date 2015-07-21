@@ -320,6 +320,29 @@ public:
   }
 
   /**
+   * [1]	N. Lao and W. W. Cohen, “Relational retrieval using a combination of path-constrained random walks.,”
+   *      ML, vol. 81, no. 1, pp. 53–67, 2010.
+   *
+   *      In the original paper they did not mention how to generate paths,
+   *      due to the fact that 600+ rel_types exist in DBpedia, we can not afford generating all combinations of paths,
+   *      which have 600^l different paths. Hence we generate paths based on starting point
+   */
+  double path_constraint_pagerank(unsigned int src, unsigned int dst, bool is_directed = false) {
+
+    is_node_valid(src);
+
+    std::vector<bool> is_visited(nodes_ptr->getMax_id() + 1, false);
+    std::map<std::string, std::vector<double> > scores;
+
+    // for path length = 0, set initial scores for each reachable node
+
+    scores[""] = std::vector<double>(nodes_ptr->getMax_id() + 1, 1.0 / nodes_ptr->getMax_id());
+
+    // get path list from h_path function
+
+  }
+
+  /**
    * [1]	T. H. Haveliwala, “Topic-sensitive pagerank,” presented at the WWW, 2002, pp. 517–526.
    *
    * Personalized PageRank
@@ -433,16 +456,16 @@ public:
     is_node_valid(src);
     is_node_valid(dst);
 
-    std::set<std::pair<uint, uint> > edges = edges_ptr->get_edges(src).get_forward();
+    std::set<std::pair<uint, uint> > &edges = edges_ptr->get_edges(src).get_forward();
 
-    for (auto it = edges.begin(); it != edges.end(); ++it) {
+    for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
       if (it->first == dst && it->second == link_type) return true;
     }
 
     if (!is_directed) {
       edges = edges_ptr->get_edges(src).get_backward();
-      for (auto it = edges.begin(); it != edges.end(); ++it) {
-        if (it->first == dst && it->second == link_type) return true;
+      for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+        if (it->first == src && it->second == link_type) return true;
       }
     }
 
@@ -545,6 +568,31 @@ public:
 
   inline unsigned int get_edge_type_count(unsigned int rel_type) {
     return edges_ptr->get_edge_type_count(rel_type);
+  }
+
+  std::set<unsigned int> get_neighbor_by_rel(unsigned int src, unsigned int rel_type, bool is_directed = false) {
+    is_node_valid(src);
+
+    edge_list &edges = edges_ptr->get_edges(src);
+
+    std::set<unsigned int> res;
+
+    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+      if (it->second == rel_type) {
+        res.insert(it->first);
+      }
+    }
+
+    if (!is_directed) {
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
+        if (it->second == rel_type) {
+          res.insert(it->first);
+        }
+      }
+    }
+
+    return res;
+
   }
 
 };

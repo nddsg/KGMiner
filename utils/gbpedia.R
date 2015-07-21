@@ -9,27 +9,54 @@ idpath2title <- function(li, mapfile) {
   })))
 }
 
+hpath_parser <- function(path) {
+  splitted <- str_split(substr(path, 1, nchar(path)-2),pattern = "--")[[1]]
+  nodes <- splitted[seq(1,length(splitted),2)]
+  edges <- str_replace_all(splitted[seq(2,length(splitted),2)], "[)(]","")
+  return(list(nodes=nodes, edges=edges))
+}
+
 request <- function(command) {
   return(system(paste("echo \"", command, "\" | socat -t 3600 - UNIX-CONNECT:/tmp/gbserver", sep=""), intern = T))
 }
 
+heter_path <- function(id1, id2, max_depth = 3) {
+  command <- paste("hpath", id1, id2, max_depth, "F", "F", sep=" ")
+  
+  paths <- request(command)
+  lapply(unlist(str_split(paths[-1], "\n")), hpath_parser)
+  print("done")
+}
+
+get_path_by_rel <- function(id1, id2, max_depth = 3, target_path=NULL) {
+  tmp_res <- heter_path(id1, id2, max_depth)
+  if(is.null(target_path)) {
+    return(lapply(tmp_res, function(x){x[["nodes"]]}))
+  }
+  tmp_res <- lapply(tmp_res, function(x){
+    if(sum(x[["edges"]] == target_path) == length(target_path)) {
+      return(unlist(x[["nodes"]]))
+    }
+  })
+  return(tmp_res[!sapply(tmp_res, is.null)])
+}
+
 rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel = 191, mapfile = NA, .raw=F) {
   library(utils)
-
-
+  library(stringr)
+  
   command <- paste("hpath", id1, id2, max_depth, ifelse(is_directed, "T", "F"), "P", sep=" ")
-
-  request(command)
+  
   paths <- request(command)
   npath <- as.numeric(str_split(paths[1], " ")[[1]][2])
   paths <- paths[-1]
-
+  
   stopifnot(npath == length(paths))
-
+  
   paths <- paths[which(!grepl(discard_rel, paths))]
-
+  
   if (!.raw) {
-
+    
     paths <- as.data.frame(table(paths))
     if (!is.na(mapfile) && is.data.frame(mapfile)) {
       paths$paths <- unlist(lapply(as.character(paths$paths), function(x){
@@ -37,21 +64,31 @@ rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel = 191
           return(paste(ifelse(x < 0, "(-1)", ""), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
+    } else {
+      paths$paths <- unlist(lapply(as.character(paths$paths), function(x){str_replace_all(x,"-","")}))
     }
-
+    
     return(paths[order(-paths$Freq),])
-
+    
   } else {
-
+    
     if (!is.na(mapfile) && is.data.frame(mapfile)) {
       paths <- unlist(lapply(as.character(paths), function(x){
         paste(unlist(lapply(as.numeric(str_split(substr(x, 0, nchar(x)-1), ",")[[1]]), function(x){
           return(paste(ifelse(x < 0, "(-1)", ""), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
+    } else {
+      paths$paths <- unlist(lapply(as.character(paths$paths), function(x){str_replace_all(x,"-","")}))
     }
     return(paths)
-  }
+  }  
+}
+
+get_neighbor_with_rel <- function(id, rel_type) {
+  command <- paste("neighborwithrel", id, rel_type, sep=" ")
+  tmpres <- str_split(request(command), ",")[[1]]
+  return(as.numeric(tmpres[1:length(tmpres)-1]))
 }
 
 adamic_adar <- function(id1, id2) {

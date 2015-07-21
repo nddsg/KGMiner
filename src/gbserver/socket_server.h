@@ -95,11 +95,11 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       if (commands.size() > 5 && is_true(commands.at(5))) { // semantic path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
-          oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "-";
+          oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "--";
           path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << g.get_edge_type(itt->second) << ")-" <<
-            g.get_node_type(itt->first) << "-";
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-") << g.get_edge_type(itt->second) << ")--" <<
+            g.get_node_type(itt->first) << "--";
             path_pos++;
           }
           oss << std::endl;
@@ -108,10 +108,10 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       } else if (is_false(commands.at(5))) { // raw path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
-          oss << commands.at(1) << "-";
+          oss << commands.at(1) << "--";
           path_pos = 0;
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-1)(") << itt->second << ")-" << itt->first << "-";
+            oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-") << itt->second << ")--" << itt->first << "--";
             path_pos++;
           }
           path_id++;
@@ -229,6 +229,21 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       oss << "\n";
       return_string = oss.str();
 
+    } else if (commands.at(0) == "neighborwithrel") {
+      std::ostringstream oss;
+      std::set<unsigned int> res = g.get_neighbor_by_rel((unsigned int) stoi(commands.at(1)),
+                                                         (unsigned int) stoi(commands.at(2)));
+      if (commands.size() >= 4 && is_true(commands.at(3))) {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << g.get_node_type(*it) << ",";
+        }
+      } else {
+        for (auto it = res.begin(); it != res.end(); ++it) {
+          oss << *it << ",";
+        }
+      }
+      oss << "\n";
+      return_string = oss.str();
 // ADAMIC ADAR
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
