@@ -83,10 +83,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     } else if (commands.at(0).compare("hpath") == 0) {
       std::ostringstream oss;
       std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
-          (unsigned int) stoi(commands.at(1)),
-          (unsigned int) stoi(commands.at(2)),
-          (unsigned int) stoi(commands.at(3)),
-          commands.size() == 4 || is_true(commands.at(4)));
+          (unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)), (unsigned int) stoi(commands.at(3)),
+          commands.size() == 5 || is_true(commands.at(5)), (unsigned int) stoi(commands.at(4)));
 
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
       std::vector<std::vector<bool> > &rel_paths = hpaths.second;
@@ -106,7 +104,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           oss << std::endl;
           path_id++;
         }
-      } else if (is_false(commands.at(5))) { // raw path
+      } else if (is_false(commands.at(6))) { // raw path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << commands.at(1) << "--";
