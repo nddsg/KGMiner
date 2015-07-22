@@ -249,8 +249,8 @@ public:
    * [1]	G. L. Ciampaglia, P. Shiralkar, L. M. Rocha, J. Bollen, F. Menczer, and A. Flammini,
    *      “Computational fact checking from knowledge networks,” Physical review E, vol. cs.CY. 14-Jan-2015.
    */
-  double semantic_proximity(unsigned int src, unsigned dst, unsigned int discard_rel) {
-    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, discard_rel, 4, false, false);
+  double semantic_proximity(unsigned int src, unsigned dst, unsigned int discard_rel = 0) {
+    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, discard_rel, 3, false, false);
     // Remove direct connected link
     auto it = paths.begin();
     while (it != paths.end()) {
