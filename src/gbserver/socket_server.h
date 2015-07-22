@@ -273,9 +273,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // PERSONALIZED PAGERANK
     } else if (commands.at(0) == "ppr") {
       return_string = std::to_string(
-          g.personalize_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
-                                 (unsigned int) stoi(commands.at(3)), 0.00001,
-                                 20, false, 0.15));
+          g.personalized_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                                  (unsigned int) stoi(commands.at(3)), 0.00001,
+                                  20, false, 0.15));
 
 // PREFERENTIAL ATTACHMENT
     } else if (commands.at(0) == "pa") {

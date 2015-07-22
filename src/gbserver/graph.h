@@ -351,8 +351,8 @@ public:
    *
    * TODO: May change to long double for more precise score.
    */
-  double personalize_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
-                              bool is_directed, double damping) {
+  double personalized_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
+                               bool is_directed, double damping) {
 
     is_node_valid(src);
     is_node_valid(dst);
@@ -385,7 +385,8 @@ public:
           }
           //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
           size_t deg = edges_ptr->get_edges(it->first).get_out_deg();
-          tmp_score += (1 - damping) * old_score[it->first] / deg;
+          if (deg != 0)
+            tmp_score += (1 - damping) * old_score[it->first] / deg;
         }
 
         if (!is_directed) {
@@ -398,7 +399,8 @@ public:
             }
             //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
             size_t deg = edges_ptr->get_edges(it->first).get_in_deg();
-            tmp_score += (1 - damping) * old_score[it->first] / deg;
+            if (deg != 0)
+              tmp_score += (1 - damping) * old_score[it->first] / deg;
           }
         }
 
