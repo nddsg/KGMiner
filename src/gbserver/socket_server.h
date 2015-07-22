@@ -83,15 +83,18 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     } else if (commands.at(0).compare("hpath") == 0) {
       std::ostringstream oss;
       std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
-          (unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)), (unsigned int) stoi(commands.at(3)),
-          commands.size() == 5 || is_true(commands.at(5)), (unsigned int) stoi(commands.at(4)));
+          (unsigned int) stoi(commands.at(1)), // src
+          (unsigned int) stoi(commands.at(2)), // dst
+          (unsigned int) stoi(commands.at(3)), // discard_rel
+          commands.size() == 5 && is_true(commands.at(5)), //directed?
+          (unsigned int) stoi(commands.at(4))); // length
 
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
       std::vector<std::vector<bool> > &rel_paths = hpaths.second;
 
       oss << "find " << paths.size() << " paths\n";
 
-      if (commands.size() > 5 && is_true(commands.at(5))) { // semantic path
+      if (commands.size() > 6 && is_true(commands.at(6))) { // semantic path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "--";
