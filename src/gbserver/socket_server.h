@@ -260,7 +260,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // SEMANTIC PROXIMITY
     } else if (commands.at(0) == "sp") {
       return_string = std::to_string(
-          g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+          g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                               (unsigned int) stoi(commands.at(3))));
 
 // MULTI_DIMENSIONAL ADAMIC ADAR
     } else if (commands.at(0) == "maa") {
