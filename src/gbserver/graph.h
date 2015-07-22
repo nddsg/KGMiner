@@ -351,8 +351,8 @@ public:
    *
    * TODO: May change to long double for more precise score.
    */
-  double personalize_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
-                              bool is_directed, double damping) {
+  double personalized_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
+                               bool is_directed, double damping) {
 
     is_node_valid(src);
     is_node_valid(dst);
@@ -371,41 +371,35 @@ public:
       for (int i = 0; i < nodes_ptr->getMax_id() + 1; i++) {
         // get score by adding up all neighbors
 
-        const std::set<std::pair<uint, uint> > &neighbors = edges_ptr->get_edges(
+        std::set<uint> neighbors;
+
+        const std::set<std::pair<uint, uint> > &in_neighbors = edges_ptr->get_edges(
             i).get_backward(); // all in-coming edges
 
-//        const std::set<uint> &neighbors = is_directed ? edges_ptr->get_edges(i).get_out_neighbors() :
-//                                          edges_ptr->get_edges(i).get_neighbors();
-
-        double tmp_score = i == src ? damping : 0.0;
-
-        for (auto it = neighbors.cbegin(); it != neighbors.cend(); it++) {
-          if (it->second == discard_rel) { // skip discarded edge
-            continue;
-          }
-          //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
-          size_t deg = edges_ptr->get_edges(it->first).get_out_deg();
-          tmp_score += (1 - damping) * old_score[it->first] / deg;
+        for (auto it = in_neighbors.cbegin(); it != in_neighbors.cend(); ++it) {
+          if (it->second != discard_rel) neighbors.insert(it->first);
         }
 
         if (!is_directed) {
           const std::set<std::pair<uint, uint> > &out_neighbors = edges_ptr->get_edges(
               i).get_forward(); // all out-going edges
-
-          for (auto it = out_neighbors.cbegin(); it != out_neighbors.cend(); it++) {
-            if (it->second == discard_rel) { // skip discarded edge
-              continue;
-            }
-            //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
-            size_t deg = edges_ptr->get_edges(it->first).get_in_deg();
-            tmp_score += (1 - damping) * old_score[it->first] / deg;
+          for (auto it = out_neighbors.cbegin(); it != out_neighbors.cend(); ++it) {
+            if (it->second != discard_rel) neighbors.insert(it->second);
           }
         }
 
-        changes += std::abs(old_score[i] - tmp_score); // changes between old score and new score
-        old_score[i] = ppr_score[i];
-        ppr_score[i] = tmp_score;
+        double tmp_score = i == src ? damping : 0.0;
 
+        for (auto it = neighbors.cbegin(); it != neighbors.cend(); it++) {
+          //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
+          size_t deg = is_directed ? edges_ptr->get_edges(*it).get_out_deg() : edges_ptr->get_edges(*it).get_deg();
+          if (deg != 0)
+            tmp_score += (1 - damping) * old_score[*it] / deg;
+
+          changes += std::abs(old_score[i] - tmp_score); // changes between old score and new score
+          old_score[i] = ppr_score[i];
+          ppr_score[i] = tmp_score;
+        }
       }
 
       std::cout << "iteration " << cnt << " complete delta " << changes << "\n";
