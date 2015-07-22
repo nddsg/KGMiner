@@ -384,7 +384,7 @@ public:
           const std::set<std::pair<uint, uint> > &out_neighbors = edges_ptr->get_edges(
               i).get_forward(); // all out-going edges
           for (auto it = out_neighbors.cbegin(); it != out_neighbors.cend(); ++it) {
-            if (it->second != discard_rel) neighbors.insert(it->second);
+            if (it->second != discard_rel) neighbors.insert(it->first);
           }
         }
 
