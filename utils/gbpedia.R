@@ -20,16 +20,16 @@ request <- function(command) {
   return(system(paste("echo \"", command, "\" | socat -t 3600 - UNIX-CONNECT:/tmp/gbserver", sep=""), intern = T))
 }
 
-heter_path <- function(id1, id2, max_depth = 3) {
-  command <- paste("hpath", id1, id2, max_depth, "F", "F", sep=" ")
+heter_path <- function(id1, id2, discard_rel, max_depth = 3) {
+  command <- paste("hpath", id1, id2, discard_rel, max_depth, "F", "F", sep=" ")
   
   paths <- request(command)
-  lapply(unlist(str_split(paths[-1], "\n")), hpath_parser)
-  print("done")
+  return(lapply(unlist(str_split(paths[-1], "\n")), hpath_parser))
 }
 
-get_path_by_rel <- function(id1, id2, max_depth = 3, target_path=NULL) {
-  tmp_res <- heter_path(id1, id2, max_depth)
+get_path_by_rel <- function(id1, id2, discard_rel, max_depth = 3, target_path=NULL) {
+  tmp_res <- heter_path(id1, id2, discard_rel, max_depth)
+  if(length(tmp_res) == 0) return(NULL)
   if(is.null(target_path)) {
     return(lapply(tmp_res, function(x){x[["nodes"]]}))
   }
@@ -41,27 +41,40 @@ get_path_by_rel <- function(id1, id2, max_depth = 3, target_path=NULL) {
   return(tmp_res[!sapply(tmp_res, is.null)])
 }
 
-rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel = 191, mapfile = NA, .raw=F) {
+rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapfile = NA, .raw=F) {
   library(utils)
   library(stringr)
   
-  command <- paste("hpath", id1, id2, max_depth, ifelse(is_directed, "T", "F"), "P", sep=" ")
+  command <- paste("hpath", id1, id2, discard_rel, max_depth, ifelse(is_directed, "T", "F"), "P", sep=" ")
   
   paths <- request(command)
   npath <- as.numeric(str_split(paths[1], " ")[[1]][2])
   paths <- paths[-1]
   
+  if(npath != length(paths)){
+    print(paste("missing paths, expected",npath,"actual",length(paths)))
+  }
   stopifnot(npath == length(paths))
   
-  paths <- paths[which(!grepl(discard_rel, paths))]
+  if (npath == 0) return(NULL)
   
-  if (!.raw) {
+  paths <- lapply(paths, function(x){
+    edgetypes <- abs(as.numeric(str_split(substr(x,1,nchar(x)-1), ",")[[1]]))
+    if(length(intersect(edgetypes, discard_rel)) == 0){
+      return(x)
+    } else {
+      return(NULL)
+    }
+  })
+  
+  paths <- unlist(paths[!sapply(paths, is.null)])
     
+  if (!.raw) {
     paths <- as.data.frame(table(paths))
     if (!is.na(mapfile) && is.data.frame(mapfile)) {
       paths$paths <- unlist(lapply(as.character(paths$paths), function(x){
         paste(unlist(lapply(as.numeric(str_split(substr(x, 0, nchar(x)-1), ",")[[1]]), function(x){
-          return(paste(ifelse(x < 0, "(-1)", ""), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
+          return(paste(ifelse(x < 0, "(-1)", "-"), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
     } else {
@@ -75,7 +88,7 @@ rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel = 191
     if (!is.na(mapfile) && is.data.frame(mapfile)) {
       paths <- unlist(lapply(as.character(paths), function(x){
         paste(unlist(lapply(as.numeric(str_split(substr(x, 0, nchar(x)-1), ",")[[1]]), function(x){
-          return(paste(ifelse(x < 0, "(-1)", ""), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
+          return(paste(ifelse(x < 0, "(-1)", "-"), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
     } else {
@@ -91,8 +104,8 @@ get_neighbor_with_rel <- function(id, rel_type) {
   return(as.numeric(tmpres[1:length(tmpres)-1]))
 }
 
-adamic_adar <- function(id1, id2) {
-  command <- paste("aa", id1, id2, sep=" ")
+adamic_adar <- function(id1, id2, discard_rel) {
+  command <- paste("aa", id1, id2, discard_rel, sep=" ")
   return(as.numeric(request(command)))
 }
 
@@ -106,23 +119,23 @@ heterogeneous_adamic_adar <- function(id1, id2, rel_type = 191) {
   return(as.numeric(request(command)))
 }
 
-semantic_proximity <- function(id1, id2) {
-  command <- paste("sp", id1, id2, sep=" ")
+semantic_proximity <- function(id1, id2, discard_rel) {
+  command <- paste("sp", id1, id2, discard_rel, sep=" ")
   return(as.numeric(request(command)))
 }
 
-ppagerank <- function(src, dst) {
-  command <- paste("ppr", src, dst, sep=" ")
+ppagerank <- function(src, dst, discard_rel) {
+  command <- paste("ppr", src, dst, discard_rel, sep=" ")
   return(as.numeric(request(command)))
 }
 
-preferential_attachment <- function(id1, id2) {
-  command <- paste("pa", id1, id2, sep=" ")
+preferential_attachment <- function(id1, id2, discard_rel) {
+  command <- paste("pa", id1, id2, discard_rel, sep=" ")
   return(as.numeric(request(command)))
 }
 
-katz <- function(id1, id2) {
-  command <- paste("katz", id1, id2, sep=" ")
+katz <- function(id1, id2, discard_rel) {
+  command <- paste("katz", id1, id2, discard_rel, sep=" ")
   return(as.numeric(request(command)))
 }
 
