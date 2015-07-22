@@ -228,11 +228,11 @@ public:
    * [1]	L. A. Adamic and E. Adar,
    *      “Friends and neighbors on the Web,” Social Networks, vol. 25, no. 3, pp. 211–230, Jul. 2003.
    */
-  double adamic_adar(unsigned int id1, unsigned id2, unsigned int rel_type = 0) {
+  double adamic_adar(unsigned int id1, unsigned id2, unsigned int discard_rel = 0) {
     is_node_valid(id1);
     is_node_valid(id2);
 
-    std::vector<unsigned int> common_neighbors = edges_ptr->get_common_neighbor(id1, id2, rel_type, false);
+    std::vector<unsigned int> common_neighbors = edges_ptr->get_common_neighbor(id1, id2, discard_rel, false);
 
     double result = 0.0;
 

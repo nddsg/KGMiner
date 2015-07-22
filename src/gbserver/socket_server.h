@@ -247,7 +247,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // ADAMIC ADAR
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
-          g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+          g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                        commands.size() > 3 ? (unsigned int) stoi(commands.at(3)) : 0));
 
 // HETEROGENEOUS ADAMIC ADAR
     } else if (commands.at(0) == "haa") {

@@ -108,16 +108,19 @@ public:
     return neighbors;
   }
 
-  std::set<unsigned int> get_neighbors(unsigned int id, unsigned int rel_type = 0, bool is_directed = false) {
+  /**
+   * Return neighbors of `id` if they are not connected by `discard_rel`.
+   */
+  std::set<unsigned int> get_neighbors(unsigned int id, unsigned int discard_rel = 0, bool is_directed = false) {
     std::set<unsigned int> neighbors;
     for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
-      if (rel_type == 0 || rel_type == it->second) {
+      if (discard_rel == 0 || discard_rel != it->second) {
         neighbors.insert(it->first);
       }
     }
     if (!is_directed) {
       for (auto it = get_edges(id).get_backward().cbegin(); it != get_edges(id).get_backward().cend(); ++it) {
-        if (rel_type == 0 || rel_type == it->second) {
+        if (discard_rel == 0 || discard_rel != it->second) {
           neighbors.insert(it->first);
         }
       }
@@ -142,10 +145,10 @@ public:
     return common_neighbors;
   }
 
-  std::vector<unsigned int> get_common_neighbor(unsigned int id1, unsigned int id2, unsigned int rel_type = 0,
+  std::vector<unsigned int> get_common_neighbor(unsigned int id1, unsigned int id2, unsigned int discard_rel = 0,
                                                 bool is_directed = false) {
-    std::set<unsigned int> neighbors_1 = get_neighbors(id1, rel_type, is_directed);
-    std::set<unsigned int> neighbors_2 = get_neighbors(id2, rel_type, is_directed);
+    std::set<unsigned int> neighbors_1 = get_neighbors(id1, discard_rel, is_directed);
+    std::set<unsigned int> neighbors_2 = get_neighbors(id2, discard_rel, is_directed);
 
     std::vector<unsigned int> common_neighbors;
 
