@@ -43,12 +43,9 @@ class graph {
   /**
    * Homogeneous dfs helper
    */
-  void dfs_helper(unsigned int src, unsigned int dst,
-                  unsigned depth, unsigned max_depth,
-                  std::vector<unsigned int> &tmp_path,
-                  std::set<unsigned int> &visited,
-                  std::vector<std::vector<unsigned int> > &result,
-                  bool is_directed, bool depth_only) {
+  void dfs_helper(unsigned int src, unsigned int dst, unsigned int discard_rel, unsigned max_depth,
+                  std::vector<unsigned int> &tmp_path, std::set<unsigned int> &visited,
+                  std::vector<std::vector<unsigned int> > &result, bool is_directed, bool depth_only, unsigned depth) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back() == dst) {
       if (!depth_only || (depth_only && tmp_path.size() == max_depth)) {
         result.push_back(tmp_path);
@@ -66,9 +63,13 @@ class graph {
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
+
+      if (it->second == discard_rel) continue; // discard certain rel_type
+
       if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) { // never visited
         tmp_path.push_back(it->first);
-        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed, depth_only);
+        dfs_helper(it->first, dst, discard_rel, max_depth, tmp_path, visited, result, is_directed, depth_only,
+                   depth + 1);
         tmp_path.pop_back();
         visited.insert(it->first);
         if (it->first == dst) {
@@ -80,9 +81,13 @@ class graph {
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
+
+        if (it->second == discard_rel) continue; // discard certain rel_type
+
         if (visited.find(it->first) == visited.end() || (it->first == dst && !dst_visited)) {
           tmp_path.push_back(it->first);
-          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, visited, result, is_directed, depth_only);
+          dfs_helper(it->first, dst, discard_rel, max_depth, tmp_path, visited, result, is_directed, depth_only,
+                     depth + 1);
           tmp_path.pop_back();
           visited.insert(it->first);
         }
@@ -95,14 +100,11 @@ class graph {
   /**
    * Heterogeneous dfs helper
    */
-  void dfs_helper(unsigned int src, unsigned int dst,
-                  unsigned depth, unsigned max_depth,
-                  std::vector<std::pair<unsigned int, unsigned int> > &tmp_path,
-                  std::vector<bool> &reverted_rel,
-                  std::set<unsigned int> &visited, // only contains nodes in the current path
+  void dfs_helper(unsigned int src, unsigned int dst, unsigned int discard_rel, unsigned max_depth,
+                  std::vector<std::pair<unsigned int, unsigned int> > &tmp_path, std::vector<bool> &reverted_rel,
+                  std::set<unsigned int> &visited,
                   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &result,
-                  std::vector<std::vector<bool> > &rel_result,
-                  bool is_directed) {
+                  std::vector<std::vector<bool> > &rel_result, bool is_directed, unsigned depth) {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back().first == dst) {
       result.push_back(tmp_path);
       rel_result.push_back(reverted_rel);
@@ -114,12 +116,14 @@ class graph {
     edge_list &edges = edges_ptr->get_edges(src);
     for (auto it = edges.get_forward().cbegin();
          it != edges.get_forward().cend(); ++it) {
+      if (it->second == discard_rel) continue;
       if (visited.find(it->first) == visited.end()) {
         tmp_path.push_back(*it);
         reverted_rel.push_back(false);
         visited.insert(it->first);
-        dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
-                   is_directed);
+        dfs_helper(it->first, dst, discard_rel, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
+                   is_directed,
+                   depth + 1);
         tmp_path.pop_back();
         reverted_rel.pop_back();
         visited.erase(it->first);
@@ -129,12 +133,14 @@ class graph {
     if (!is_directed) {
       for (auto it = edges.get_backward().cbegin();
            it != edges.get_backward().cend(); ++it) {
+        if (it->second == discard_rel) continue;
         if (visited.find(it->first) == visited.end()) {
           tmp_path.push_back(*it);
           reverted_rel.push_back(true);
           visited.insert(it->first);
-          dfs_helper(it->first, dst, depth + 1, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
-                     is_directed);
+          dfs_helper(it->first, dst, discard_rel, max_depth, tmp_path, reverted_rel, visited, result, rel_result,
+                     is_directed,
+                     depth + 1);
           tmp_path.pop_back();
           reverted_rel.pop_back();
           visited.erase(it->first);
@@ -164,10 +170,8 @@ public:
     return edges_ptr->get_edges(src).get_in_neighbors();
   }
 
-  std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src,
-                                                          unsigned int dst,
-                                                          unsigned int depth = 4,
-                                                          bool is_directed = true, bool depth_only = false) {
+  std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src, unsigned int dst, unsigned int discard_rel,
+                                                          unsigned int depth, bool depth_only, bool is_directed) {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -178,7 +182,7 @@ public:
       std::set<unsigned int> visited;
       tmp_path.push_back(src);
       visited.insert(src);
-      dfs_helper(src, dst, 1u, depth, tmp_path, visited, result, is_directed, depth_only);
+      dfs_helper(src, dst, discard_rel, depth, tmp_path, visited, result, is_directed, depth_only, 1u);
       assert(tmp_path.size() == 1); // only source node is in it.
     } catch (std::exception error) {
       std::cerr << "Error occurred when performing dfs, " << error.what() << std::endl;
@@ -189,10 +193,7 @@ public:
   };
 
   std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > heterogeneous_dfs(
-      unsigned int src,
-      unsigned int dst,
-      unsigned int depth = 4,
-      bool is_directed = true) {
+      unsigned int src, unsigned int dst, unsigned int discard_rel, bool is_directed, unsigned int depth) {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -204,7 +205,8 @@ public:
       std::vector<bool> tmp_reverted;
       std::set<unsigned int> visited;
       visited.insert(src);
-      dfs_helper(src, dst, 1u, depth, tmp_path, tmp_reverted, visited, path_result, rel_result, is_directed);
+      dfs_helper(src, dst, discard_rel, depth, tmp_path, tmp_reverted, visited, path_result, rel_result, is_directed,
+                 1u);
       assert(tmp_path.size() == 0);
     } catch (std::exception error) {
       std::cerr << "Error occurred when performing heterogeneous dfs, " << error.what() << std::endl;
@@ -228,11 +230,11 @@ public:
    * [1]	L. A. Adamic and E. Adar,
    *      “Friends and neighbors on the Web,” Social Networks, vol. 25, no. 3, pp. 211–230, Jul. 2003.
    */
-  double adamic_adar(unsigned int id1, unsigned id2, unsigned int rel_type = 0) {
+  double adamic_adar(unsigned int id1, unsigned id2, unsigned int discard_rel = 0) {
     is_node_valid(id1);
     is_node_valid(id2);
 
-    std::vector<unsigned int> common_neighbors = edges_ptr->get_common_neighbor(id1, id2, rel_type, false);
+    std::vector<unsigned int> common_neighbors = edges_ptr->get_common_neighbor(id1, id2, discard_rel, false);
 
     double result = 0.0;
 
@@ -248,8 +250,8 @@ public:
    * [1]	G. L. Ciampaglia, P. Shiralkar, L. M. Rocha, J. Bollen, F. Menczer, and A. Flammini,
    *      “Computational fact checking from knowledge networks,” Physical review E, vol. cs.CY. 14-Jan-2015.
    */
-  double semantic_proximity(unsigned int src, unsigned dst) {
-    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, 4, false);
+  double semantic_proximity(unsigned int src, unsigned dst, unsigned int discard_rel = 0) {
+    std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, discard_rel, 3, false, false);
     // Remove direct connected link
     auto it = paths.begin();
     while (it != paths.end()) {
@@ -349,8 +351,8 @@ public:
    *
    * TODO: May change to long double for more precise score.
    */
-  double personalize_pagerank(unsigned int src, unsigned int dst, double damping = 0.15, double delta = 0.000001,
-                              int iter = 1000, bool is_directed = false) {
+  double personalized_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
+                               bool is_directed, double damping) {
 
     is_node_valid(src);
     is_node_valid(dst);
@@ -368,22 +370,36 @@ public:
 
       for (int i = 0; i < nodes_ptr->getMax_id() + 1; i++) {
         // get score by adding up all neighbors
-        const std::set<uint> &neighbors = is_directed ? edges_ptr->get_edges(i).get_out_neighbors() :
-                                          edges_ptr->get_edges(i).get_neighbors();
+
+        std::set<uint> neighbors;
+
+        const std::set<std::pair<uint, uint> > &in_neighbors = edges_ptr->get_edges(
+            i).get_backward(); // all in-coming edges
+
+        for (auto it = in_neighbors.cbegin(); it != in_neighbors.cend(); ++it) {
+          if (it->second != discard_rel) neighbors.insert(it->first);
+        }
+
+        if (!is_directed) {
+          const std::set<std::pair<uint, uint> > &out_neighbors = edges_ptr->get_edges(
+              i).get_forward(); // all out-going edges
+          for (auto it = out_neighbors.cbegin(); it != out_neighbors.cend(); ++it) {
+            if (it->second != discard_rel) neighbors.insert(it->first);
+          }
+        }
 
         double tmp_score = i == src ? damping : 0.0;
 
         for (auto it = neighbors.cbegin(); it != neighbors.cend(); it++) {
-          if ((*it == dst && i == src) || (*it == src && i == dst)) { // skip direct connected edge
-            continue;
-          }
           //TODO: The degree of src and dst is actually deg - 1 if src and dst are directly connected.
           size_t deg = is_directed ? edges_ptr->get_edges(*it).get_out_deg() : edges_ptr->get_edges(*it).get_deg();
-          tmp_score += (1 - damping) * old_score[*it] / deg;
+          if (deg != 0)
+            tmp_score += (1 - damping) * old_score[*it] / deg;
+
+          changes += std::abs(old_score[i] - tmp_score); // changes between old score and new score
+          old_score[i] = ppr_score[i];
+          ppr_score[i] = tmp_score;
         }
-        changes += std::abs(old_score[i] - tmp_score); // changes between old score and new score
-        old_score[i] = ppr_score[i];
-        ppr_score[i] = tmp_score;
       }
 
       std::cout << "iteration " << cnt << " complete delta " << changes << "\n";
@@ -415,13 +431,14 @@ public:
    * [2]	D. Liben-Nowell and J. M. Kleinberg, “The link prediction problem for social networks.,”
    * CIKM, pp. 556–559, 2003.
    */
-  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.05) {
+  double katz(unsigned int id1, unsigned int id2, unsigned int discard_rel, unsigned int max_length = 3,
+              double beta = 0.05) {
     is_node_valid(id1);
     is_node_valid(id2);
     double score = 0;
     for (int i = 3; i <=
                     max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
-      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, max_length, false, true);
+      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, discard_rel, max_length, true, false);
       double tmp_score = double(paths.size());
       for (int j = 0; j < i; j++) {
         tmp_score *= beta;

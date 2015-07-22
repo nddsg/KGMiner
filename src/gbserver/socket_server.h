@@ -57,11 +57,12 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       std::vector<std::vector<unsigned int> > paths = g.homogeneous_dfs((unsigned int) stoi(commands.at(1)),
                                                                         (unsigned int) stoi(commands.at(2)),
                                                                         (unsigned int) stoi(commands.at(3)),
-                                                                        commands.size() == 4 ||
-                                                                        is_true(commands.at(4)));
+                                                                        (unsigned int) stoi(commands.at(4)), false,
+                                                                        commands.size() == 5 ||
+                                                                        is_true(commands.at(5)));
 
       oss << "find " << paths.size() << " paths\n";
-      if (commands.size() > 5 && is_true(commands.at(5))) {
+      if (commands.size() > 6 && is_true(commands.at(6))) {
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
             oss << g.get_node_type(*itt) << "--";
@@ -82,17 +83,18 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
     } else if (commands.at(0).compare("hpath") == 0) {
       std::ostringstream oss;
       std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > hpaths = g.heterogeneous_dfs(
-          (unsigned int) stoi(commands.at(1)),
-          (unsigned int) stoi(commands.at(2)),
-          (unsigned int) stoi(commands.at(3)),
-          commands.size() == 4 || is_true(commands.at(4)));
+          (unsigned int) stoi(commands.at(1)), // src
+          (unsigned int) stoi(commands.at(2)), // dst
+          (unsigned int) stoi(commands.at(3)), // discard_rel
+          commands.size() == 5 && is_true(commands.at(5)), //directed?
+          (unsigned int) stoi(commands.at(4))); // length
 
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &paths = hpaths.first;
       std::vector<std::vector<bool> > &rel_paths = hpaths.second;
 
       oss << "find " << paths.size() << " paths\n";
 
-      if (commands.size() > 5 && is_true(commands.at(5))) { // semantic path
+      if (commands.size() > 6 && is_true(commands.at(6))) { // semantic path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << g.get_node_type((unsigned int) stoi(commands.at(1))) << "--";
@@ -105,7 +107,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
           oss << std::endl;
           path_id++;
         }
-      } else if (is_false(commands.at(5))) { // raw path
+      } else if (is_false(commands.at(6))) { // raw path
         size_t path_id = 0, path_pos = 0;
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           oss << commands.at(1) << "--";
@@ -247,7 +249,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // ADAMIC ADAR
     } else if (commands.at(0) == "aa") {
       return_string = std::to_string(
-          g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+          g.adamic_adar((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                        commands.size() > 3 ? (unsigned int) stoi(commands.at(3)) : 0));
 
 // HETEROGENEOUS ADAMIC ADAR
     } else if (commands.at(0) == "haa") {
@@ -258,7 +261,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // SEMANTIC PROXIMITY
     } else if (commands.at(0) == "sp") {
       return_string = std::to_string(
-          g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2))));
+          g.semantic_proximity((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                               (unsigned int) stoi(commands.at(3))));
 
 // MULTI_DIMENSIONAL ADAMIC ADAR
     } else if (commands.at(0) == "maa") {
@@ -269,8 +273,9 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // PERSONALIZED PAGERANK
     } else if (commands.at(0) == "ppr") {
       return_string = std::to_string(
-          g.personalize_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
-                                 0.15, 0.00001, 20, false));
+          g.personalized_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                                  (unsigned int) stoi(commands.at(3)), 0.00001,
+                                  20, false, 0.15));
 
 // PREFERENTIAL ATTACHMENT
     } else if (commands.at(0) == "pa") {
@@ -280,8 +285,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // KATZ
     } else if (commands.at(0) == "katz") {
       return_string = std::to_string(
-          g.katz((unsigned int) stoi(commands.at(1)),
-                 (unsigned int) stoi(commands.at(2))));
+          g.katz((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                 (unsigned int) stoi(commands.at(3))));
 
 // CHECK IF TWO NODE CONNECTED BY CERTAIN LINK_TYPE
     } else if (commands.at(0) == "connectedby") {
