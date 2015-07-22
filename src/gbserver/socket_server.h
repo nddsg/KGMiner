@@ -57,11 +57,12 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       std::vector<std::vector<unsigned int> > paths = g.homogeneous_dfs((unsigned int) stoi(commands.at(1)),
                                                                         (unsigned int) stoi(commands.at(2)),
                                                                         (unsigned int) stoi(commands.at(3)),
-                                                                        commands.size() == 4 ||
-                                                                        is_true(commands.at(4)));
+                                                                        (unsigned int) stoi(commands.at(4)), false,
+                                                                        commands.size() == 5 ||
+                                                                        is_true(commands.at(5)));
 
       oss << "find " << paths.size() << " paths\n";
-      if (commands.size() > 5 && is_true(commands.at(5))) {
+      if (commands.size() > 6 && is_true(commands.at(6))) {
         for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
           for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
             oss << g.get_node_type(*itt) << "--";
