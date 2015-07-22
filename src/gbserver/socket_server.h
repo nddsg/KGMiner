@@ -284,8 +284,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 // KATZ
     } else if (commands.at(0) == "katz") {
       return_string = std::to_string(
-          g.katz((unsigned int) stoi(commands.at(1)),
-                 (unsigned int) stoi(commands.at(2))));
+          g.katz((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                 (unsigned int) stoi(commands.at(3))));
 
 // CHECK IF TWO NODE CONNECTED BY CERTAIN LINK_TYPE
     } else if (commands.at(0) == "connectedby") {

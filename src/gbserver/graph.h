@@ -436,13 +436,14 @@ public:
    * [2]	D. Liben-Nowell and J. M. Kleinberg, “The link prediction problem for social networks.,”
    * CIKM, pp. 556–559, 2003.
    */
-  double katz(unsigned int id1, unsigned int id2, unsigned int max_length = 5, double beta = 0.05) {
+  double katz(unsigned int id1, unsigned int id2, unsigned int discard_rel, unsigned int max_length = 3,
+              double beta = 0.05) {
     is_node_valid(id1);
     is_node_valid(id2);
     double score = 0;
     for (int i = 3; i <=
                     max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
-      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, 0, max_length, true, false);
+      std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, discard_rel, max_length, true, false);
       double tmp_score = double(paths.size());
       for (int j = 0; j < i; j++) {
         tmp_score *= beta;
