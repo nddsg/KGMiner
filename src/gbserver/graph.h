@@ -473,15 +473,14 @@ public:
     is_node_valid(src);
     is_node_valid(dst);
 
-    std::set<std::pair<uint, uint> > &edges = edges_ptr->get_edges(src).get_forward();
+    edge_list &edges = edges_ptr->get_edges(src);
 
-    for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
       if (it->first == dst && it->second == link_type) return true;
     }
 
     if (!is_directed) {
-      edges = edges_ptr->get_edges(src).get_backward();
-      for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
         if (it->first == src && it->second == link_type) return true;
       }
     }
