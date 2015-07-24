@@ -468,6 +468,50 @@ public:
     return edges_ptr->get_ontology_sibling_count(id);
   }
 
+  bool connected_by_helper(unsigned int src, unsigned int dst, unsigned int pos, std::vector<unsigned int> &link_type,
+                           bool is_directed) {
+    edge_list &edges = edges_ptr->get_edges(src);
+
+    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+      if (it->second == link_type[pos]) { // match link type
+        if (pos == link_type.size() - 1) { // reach the end
+          if (it->first == dst) {
+            return true;
+          }
+        } else { // not reach the end
+          if (connected_by_helper(it->first, dst, pos + 1, link_type, is_directed)) { // if find it
+            return true;
+          }
+        }
+      }
+    }
+
+    if (!is_directed) {
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
+        if (it->second == link_type[pos]) { // match link type
+          if (pos == link_type.size() - 1) { // reach the end
+            if (it->first == dst) {
+              return true;
+            }
+          } else { // not reach the end
+            if (connected_by_helper(it->first, dst, pos + 1, link_type, is_directed)) { // if find it
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool connected_by(unsigned int src, unsigned int dst, std::vector<unsigned int> link_type, bool is_directed = false) {
+    is_node_valid(src);
+    is_node_valid(dst);
+
+    return (connected_by_helper(src, dst, 0, link_type, is_directed));
+
+  }
 
   bool connected_by(unsigned int src, unsigned int dst, unsigned int link_type, bool is_directed = false) {
     is_node_valid(src);
