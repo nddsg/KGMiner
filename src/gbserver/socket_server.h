@@ -278,6 +278,16 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
                                   20, is_true(commands.at(4)), 0.15));
 
 // PREFERENTIAL ATTACHMENT
+    } else if (commands.at(0) == "pcrw") {
+      std::vector<unsigned int> metapath;
+      for (int i = 4; i <= stoi(commands.at(3)) + 3; i++) {
+        metapath.push_back((unsigned int) stoi(commands.at(i)));
+      }
+      //TODO: add is_directed to CLI argument list
+      return_string = std::to_string(
+          g.path_constraint_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)), metapath,
+                                     true)
+      );
     } else if (commands.at(0) == "pa") {
       return_string = std::to_string(g.preferential_attachment((unsigned int) stoi(commands.at(1)),
                                                                (unsigned int) stoi(commands.at(2))));

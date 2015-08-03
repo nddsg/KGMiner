@@ -128,6 +128,41 @@ public:
     return neighbors;
   }
 
+  std::set<unsigned int> get_neighbors_by_rel(unsigned int id, unsigned int rel, bool is_directed = false) {
+    std::set<unsigned int> neighbors;
+    for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
+      if (rel == it->second) {
+        neighbors.insert(it->first);
+      }
+    }
+    if (!is_directed) {
+      for (auto it = get_edges(id).get_backward().cbegin(); it != get_edges(id).get_backward().cend(); ++it) {
+        if (rel == it->second) {
+          neighbors.insert(it->first);
+        }
+      }
+    }
+    return neighbors;
+  }
+
+  unsigned int get_neighbor_count_by_rel(unsigned int id, unsigned int rel, bool is_directed = false) {
+    unsigned int res = 0;
+    for (auto it = get_edges(id).get_forward().cbegin(); it != get_edges(id).get_forward().cend(); ++it) {
+      if (rel == it->second) {
+        res++;
+      }
+    }
+    if (!is_directed) {
+      for (auto it = get_edges(id).get_backward().cbegin(); it != get_edges(id).get_backward().cend(); ++it) {
+        if (rel == it->second) {
+          res++;
+        }
+      }
+    }
+
+    return res;
+  }
+
   std::vector<std::pair<unsigned int, unsigned int> > get_common_neighbor_except_rel(unsigned int id1, unsigned int id2,
                                                                                      unsigned int rel_type = 0,
                                                                                      bool is_directed = false) {
