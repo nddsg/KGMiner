@@ -329,18 +329,41 @@ public:
    *      due to the fact that 600+ rel_types exist in DBpedia, we can not afford generating all combinations of paths,
    *      which have 600^l different paths. Hence we generate paths based on starting point
    */
-  double path_constraint_pagerank(unsigned int src, unsigned int dst, bool is_directed = false) {
+  double path_constraint_pagerank(unsigned int src, unsigned int dst, std::vector<unsigned int> metapath,
+                                  bool is_directed = true) {
 
     is_node_valid(src);
+    is_node_valid(dst);
+
+    if (metapath.size() == 0) return 0.0;
 
     std::vector<bool> is_visited(nodes_ptr->getMax_id() + 1, false);
-    std::map<std::string, std::vector<double> > scores;
+    std::vector<double> score(nodes_ptr->getMax_id() + 1, 0.0);
 
+    std::vector<unsigned int> rel_count(nodes_ptr->getMax_id() + 1, 0);
     // for path length = 0, set initial scores for each reachable node
 
-    scores[""] = std::vector<double>(nodes_ptr->getMax_id() + 1, 1.0 / nodes_ptr->getMax_id());
+    score[src] = 1.0;
 
-    // get path list from h_path function
+    // for path length >= 1, calculate scores.
+
+    for (auto it = metapath.cbegin(); it != metapath.cend(); ++it) {
+      for (unsigned int i = 0; i < nodes_ptr->getMax_id(); i++) {
+        rel_count[i] = edges_ptr->get_neighbor_count_by_rel(i, *it, is_directed);
+      }
+      // calculate scores
+      for (unsigned int i = 0; i < nodes_ptr->getMax_id(); i++) {
+        auto back_edges = edges_ptr->get_edges(i).get_backward();
+        for (auto prev = back_edges.cbegin(); prev != back_edges.cend(); ++prev) {
+          if (prev->second == *it) {
+            score[i] +=
+                score[prev->first] / double(rel_count[prev->first]);
+          }
+        }
+      }
+    }
+
+    return score[dst];
 
   }
 
@@ -468,20 +491,63 @@ public:
     return edges_ptr->get_ontology_sibling_count(id);
   }
 
+  bool connected_by_helper(unsigned int src, unsigned int dst, unsigned int pos, std::vector<unsigned int> &link_type,
+                           bool is_directed) {
+    edge_list &edges = edges_ptr->get_edges(src);
+
+    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
+      if (it->second == link_type[pos]) { // match link type
+        if (pos == link_type.size() - 1) { // reach the end
+          if (it->first == dst) {
+            return true;
+          }
+        } else { // not reach the end
+          if (connected_by_helper(it->first, dst, pos + 1, link_type, is_directed)) { // if find it
+            return true;
+          }
+        }
+      }
+    }
+
+    if (!is_directed) {
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
+        if (it->second == link_type[pos]) { // match link type
+          if (pos == link_type.size() - 1) { // reach the end
+            if (it->first == dst) {
+              return true;
+            }
+          } else { // not reach the end
+            if (connected_by_helper(it->first, dst, pos + 1, link_type, is_directed)) { // if find it
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool connected_by(unsigned int src, unsigned int dst, std::vector<unsigned int> link_type, bool is_directed = false) {
+    is_node_valid(src);
+    is_node_valid(dst);
+
+    return (connected_by_helper(src, dst, 0, link_type, is_directed));
+
+  }
 
   bool connected_by(unsigned int src, unsigned int dst, unsigned int link_type, bool is_directed = false) {
     is_node_valid(src);
     is_node_valid(dst);
 
-    std::set<std::pair<uint, uint> > &edges = edges_ptr->get_edges(src).get_forward();
+    edge_list &edges = edges_ptr->get_edges(src);
 
-    for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+    for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
       if (it->first == dst && it->second == link_type) return true;
     }
 
     if (!is_directed) {
-      edges = edges_ptr->get_edges(src).get_backward();
-      for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+      for (auto it = edges.get_backward().cbegin(); it != edges.get_backward().cend(); ++it) {
         if (it->first == src && it->second == link_type) return true;
       }
     }

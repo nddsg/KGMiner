@@ -275,9 +275,19 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       return_string = std::to_string(
           g.personalized_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
                                   (unsigned int) stoi(commands.at(3)), 0.00001,
-                                  20, false, 0.15));
+                                  20, is_true(commands.at(4)), 0.15));
 
 // PREFERENTIAL ATTACHMENT
+    } else if (commands.at(0) == "pcrw") {
+      std::vector<unsigned int> metapath;
+      for (int i = 4; i <= stoi(commands.at(3)) + 3; i++) {
+        metapath.push_back((unsigned int) stoi(commands.at(i)));
+      }
+      //TODO: add is_directed to CLI argument list
+      return_string = std::to_string(
+          g.path_constraint_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)), metapath,
+                                     true)
+      );
     } else if (commands.at(0) == "pa") {
       return_string = std::to_string(g.preferential_attachment((unsigned int) stoi(commands.at(1)),
                                                                (unsigned int) stoi(commands.at(2))));
@@ -290,9 +300,13 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
 
 // CHECK IF TWO NODE CONNECTED BY CERTAIN LINK_TYPE
     } else if (commands.at(0) == "connectedby") {
+      std::vector<unsigned int> rel_types;
+      for (int i = 4; i <= stoi(commands.at(3)) + 3; i++) {
+        rel_types.push_back(stoi(commands.at(i)));
+      }
       return_string = std::to_string(g.connected_by((unsigned int) stoi(commands.at(1)),
                                                     (unsigned int) stoi(commands.at(2)),
-                                                    (unsigned int) stoi(commands.at(3))));
+                                                    rel_types));
     } else if (commands.at(0) == "truelabeled") {
       std::set<std::pair<unsigned int, unsigned int> > true_labeled_pairs = g.get_entity_pairs_by_triple(
           (unsigned int) stoi(commands.at(1)),
