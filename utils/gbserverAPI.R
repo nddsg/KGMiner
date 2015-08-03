@@ -20,6 +20,11 @@ request <- function(command) {
   return(system(paste("echo \"", command, "\" | socat -t 3600 - UNIX-CONNECT:/tmp/gbserver", sep=""), intern = T))
 }
 
+pcrw <- function(src, dst, metapath) {
+  command <- paste("pcrw", src, dst, length(metapath), paste(metapath, collapse = " "), sep=" ")
+  return(as.numeric(request(command)))
+}
+
 heter_path <- function(id1, id2, discard_rel, max_depth = 3) {
   command <- paste("hpath", id1, id2, discard_rel, max_depth, "F", "F", sep=" ")
   
@@ -68,7 +73,7 @@ rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapf
   })
   
   paths <- unlist(paths[!sapply(paths, is.null)])
-    
+  
   if (!.raw) {
     paths <- as.data.frame(table(paths))
     if (!is.na(mapfile) && is.data.frame(mapfile)) {
@@ -124,8 +129,8 @@ semantic_proximity <- function(id1, id2, discard_rel) {
   return(as.numeric(request(command)))
 }
 
-ppagerank <- function(src, dst, discard_rel) {
-  command <- paste("ppr", src, dst, discard_rel, sep=" ")
+ppagerank <- function(src, dst, discard_rel, is_directed = T) {
+  command <- paste("ppr", src, dst, discard_rel, ifelse(is_directed, "TRUE","FALSE"), sep=" ")
   return(as.numeric(request(command)))
 }
 
@@ -140,7 +145,7 @@ katz <- function(id1, id2, discard_rel) {
 }
 
 connectedby <- function(src, dst, rel_type = 404) {
-  command <- paste("connectedby", src, dst, rel_type, sep=" ")
+  command <- paste("connectedby", src, dst, length(rel_type), paste(rel_type,collapse = " "), sep=" ")
   return(as.numeric(request(command)))
 }
 
