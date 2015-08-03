@@ -329,18 +329,37 @@ public:
    *      due to the fact that 600+ rel_types exist in DBpedia, we can not afford generating all combinations of paths,
    *      which have 600^l different paths. Hence we generate paths based on starting point
    */
-  double path_constraint_pagerank(unsigned int src, unsigned int dst, bool is_directed = false) {
+  double path_constraint_pagerank(unsigned int src, unsigned int dst, std::vector<unsigned int> metapath,
+                                  bool is_directed = true) {
 
     is_node_valid(src);
+    is_node_valid(dst);
+
+    if (metapath.size() == 0) return 0.0;
 
     std::vector<bool> is_visited(nodes_ptr->getMax_id() + 1, false);
-    std::map<std::string, std::vector<double> > scores;
+    std::vector<double> score(nodes_ptr->getMax_id() + 1, 0.0);
 
     // for path length = 0, set initial scores for each reachable node
 
-    scores[""] = std::vector<double>(nodes_ptr->getMax_id() + 1, 1.0 / nodes_ptr->getMax_id());
+    score[src] = 1.0;
 
-    // get path list from h_path function
+    // for path length >= 1, calculate scores.
+
+    for (auto it = metapath.cbegin(); it != metapath.cend(); ++it) {
+      // calculate scores
+      for (unsigned int i = 0; i < nodes_ptr->getMax_id(); i++) {
+        auto back_edges = edges_ptr->get_edges(i).get_backward();
+        for (auto prev = back_edges.cbegin(); prev != back_edges.cend(); ++prev) {
+          if (prev->second == *it) {
+            score[i] +=
+                score[prev->first] / double(edges_ptr->get_neighbor_count_by_rel(prev->first, *it, is_directed));
+          }
+        }
+      }
+    }
+
+    return score[dst];
 
   }
 
