@@ -329,8 +329,8 @@ public:
    *      due to the fact that 600+ rel_types exist in DBpedia, we can not afford generating all combinations of paths,
    *      which have 600^l different paths. Hence we generate paths based on starting point
    */
-  double path_constraint_pagerank(unsigned int src, unsigned int dst, std::vector<unsigned int> metapath,
-                                  bool is_directed = true) {
+  double path_constrained_random_walk(unsigned int src, unsigned int dst, std::vector<unsigned int> metapath,
+                                      bool is_directed = true) {
 
     is_node_valid(src);
     is_node_valid(dst);
