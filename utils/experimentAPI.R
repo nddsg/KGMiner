@@ -6,7 +6,7 @@ library(RWeka)
 
 source("./gbserverAPI.R")
 
-## All input df must have at least three columns, first two columns are ids and the third column is class label.
+## All input dfs must have at least three columns, first two columns are ids and the third column is class label.
 
 eval.df <- function(df) {
   res <- list()
@@ -53,6 +53,22 @@ eval.ppr <- function(df, discard_rel) {
     })))
   }
   return(eval.helper(df, discard_rel, func.ppr))
+}
+
+## Path Constrainted Random Walk
+eval.pcrw <- function(df, metapaths) {
+  func.pcrw <- function(df, metapaths) {
+    tmp.df <- as.data.frame(df[,3])
+    
+    for(metapath in metapaths) {
+      tmp.df <- cbind(tmp.df, parApply(cl, df, 1, function(y){
+        return(pcrw(as.numeric(y[1]), as.numeric(y[2]), metapath))
+      }))
+    }
+    colnames(tmp.df) <- c("label",paste("feature", 1:(ncol(tmp.df)-1), sep = "_"))
+    return(tmp.df)
+  }
+  return(eval.helper(df, metapaths, func.pcrw))
 }
 
 ## Preferential Attachment

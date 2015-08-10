@@ -285,9 +285,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
       }
       //TODO: add is_directed to CLI argument list
       return_string = std::to_string(
-          g.path_constraint_pagerank((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)), metapath,
-                                     true)
-      );
+          g.path_constrained_random_walk((unsigned int) stoi(commands.at(1)), (unsigned int) stoi(commands.at(2)),
+                                         metapath, true));
     } else if (commands.at(0) == "pa") {
       return_string = std::to_string(g.preferential_attachment((unsigned int) stoi(commands.at(1)),
                                                                (unsigned int) stoi(commands.at(2))));
