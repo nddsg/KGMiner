@@ -204,7 +204,7 @@ public:
         types.push_back(it->first);
       }
     }
-
+    sort(types.begin(), types.end());
     return types;
   }
 
