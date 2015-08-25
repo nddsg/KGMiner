@@ -107,7 +107,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
         oss << "--";
         path_pos = 0;
         for (auto itt = it->cbegin(); itt != it->cend(); ++itt) {
-          oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-") << g.get_edge_type(itt->second) << ")--";
+          oss << (!rel_paths.at(path_id).at(path_pos) ? "(" : "(-") << itt->second << ")--";
 
           auto ontol = g.get_ontology(itt->first);
           oss << "{";
