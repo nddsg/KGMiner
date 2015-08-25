@@ -28,6 +28,9 @@ int main(int argc, const char *argv[]) {
 
   std::cout << "Load " << edges.getNedges() << " edges with " << edges.getMax_rel() <<" relations\n";
 
+  std::cout << edges.get_nentity_with_ontology() << " out of " << nodes.getMax_id() <<
+  " have valid ontology information\n";
+
   if (nodes.getMax_id() != edges.getMax_id()) {
     std::cerr << "Warning: #Node does not match in NodeList (" << nodes.getMax_id() << ")"
               << " and EdgeList (" << edges.getMax_id() <<")";

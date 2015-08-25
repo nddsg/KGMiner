@@ -20,6 +20,7 @@ private:
   std::vector<unsigned int> edge_type_count;
   std::map<unsigned int, std::pair<std::set<unsigned int>, unsigned int> > node_type_count;
   uint max_id, max_rel, nedges;
+    int entity_with_entology;
 
   const unsigned int type_rel;
 
@@ -27,7 +28,7 @@ public:
 
   //TODO: Automatically detect id of rel_type rdf-syntax-ns#type
   edge_loader(std::string edge_filepath, bool is_directed = false, unsigned int type_rel = 671) :
-      max_id(0), max_rel(0), nedges(0), type_rel(type_rel) {
+      max_id(0), max_rel(0), nedges(0), type_rel(type_rel), entity_with_entology(-1) {
     std::fstream fin(edge_filepath, std::fstream::in);
 
     uint src, dst, rel;
@@ -268,6 +269,24 @@ public:
 
     return res;
   }
+
+    int get_nentity_with_ontology() {
+      if (entity_with_entology == -1) {
+        entity_with_entology = 0;
+
+        for (int id = 0; id < max_id; id++) {
+          std::set<std::pair<unsigned int, unsigned int> > &edges = get_edges(id).get_forward();
+          for (auto it = edges.begin(); it != edges.end(); ++it) {
+            if (it->second == type_rel) { // this is an ontology edge
+              entity_with_entology++;
+              break;
+            }
+          }
+        }
+      }
+
+      return entity_with_entology;
+    }
 
   unsigned int get_ontology_count(unsigned int id) {
     return node_type_count[id].second;
