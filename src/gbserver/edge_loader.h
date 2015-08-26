@@ -281,7 +281,6 @@ public:
           for (auto it = edges.begin(); it != edges.end(); ++it) {
             if (it->second == type_rel) { // this is an ontology edge
               counter++;
-              break;
             }
           }
           if (counter > 0) entity_with_entology++;
