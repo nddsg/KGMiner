@@ -678,6 +678,8 @@ public:
 
   }
 
+    unsigned int get_nontology() { return edges_ptr->get_nontology(); }
+
 };
 
 #endif //GBPEDIA_GRAPH_H

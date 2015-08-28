@@ -297,6 +297,24 @@ public:
 
   inline unsigned int get_type_rel() { return type_rel; }
 
+    unsigned int get_nentity_connected_by_rel(unsigned int rel) {
+      unsigned int counter = 0;
+      for (int id = 0; id < max_id; id++) {
+        std::set<std::pair<unsigned int, unsigned int> > &edges = get_edges(id).get_backward();
+        for (auto it = edges.cbegin(); it != edges.cend(); ++it) {
+          if (it->second == rel) {
+            counter++; // if id is connected by rel type, break;
+            break;
+          }
+        }
+      }
+      return counter;
+    }
+
+    unsigned int get_nontology() {
+      return get_nentity_connected_by_rel(type_rel);
+    }
+
 };
 
 
