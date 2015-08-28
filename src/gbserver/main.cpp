@@ -24,7 +24,7 @@ int main(int argc, const char *argv[]) {
 
   std::cout << "Load " << edgetypes.getMax_rel() << " rels\n";
 
-  edge_loader edges(options.getEdge_filepath(), options.getIs_directed());
+  edge_loader edges(options.getEdge_filepath(), options.getIs_directed(), options.getRel_type());
 
   std::cout << "Load " << edges.getNedges() << " edges with " << edges.getMax_rel() <<" relations\n";
 

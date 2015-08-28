@@ -16,6 +16,7 @@
     int port = 8964;
     bool is_directed;
     int nworker = 10;
+      unsigned int rel_type = 671;
 
   public:
     opts();
@@ -23,6 +24,11 @@
     bool parse(int argc, const char* argv[]);
 
   public:
+
+      const unsigned int &getRel_type() const {
+        return rel_type;
+      }
+
     const std::string &getNode_filepath() const {
       return node_filepath;
     }

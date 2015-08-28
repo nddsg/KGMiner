@@ -21,7 +21,9 @@ opts::opts() : desc("Allowed options") {
         ("directed,d", "Directed graph")
         ("port,p", boost::program_options::value<int>(),
          port_desc.c_str())
-        ("worker,w", boost::program_options::value<int>(), "Number of workers, default is 10");
+        ("worker,w", boost::program_options::value<int>(), "Number of workers, default is 10")
+        ("ontology,o", boost::program_options::value<unsigned int>(),
+         "ontology relation type, the default value is 671");
   }
 
   bool opts::parse(int argc, const char *argv[]) {
@@ -52,6 +54,10 @@ opts::opts() : desc("Allowed options") {
       }
       if (vm.count("worker")) {
         nworker = vm["worker"].as<int>();
+      }
+      if (vm.count("ontology")) {
+        rel_type = vm["ontology"].as < unsigned
+        int > ();
       }
       is_directed = vm.count("directed") == 1;
     } catch (std::exception& err) {
