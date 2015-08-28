@@ -24,9 +24,16 @@ int main(int argc, const char *argv[]) {
 
   std::cout << "Load " << edgetypes.getMax_rel() << " rels\n";
 
-  edge_loader edges(options.getEdge_filepath(), options.getIs_directed());
+  edge_loader edges(options.getEdge_filepath(), options.getIs_directed(), options.getRel_type());
 
   std::cout << "Load " << edges.getNedges() << " edges with " << edges.getMax_rel() <<" relations\n";
+
+  std::pair<int, int> entity_labels = edges.get_nentity_with_ontology();
+
+  std::cout << entity_labels.first << " out of " << nodes.getMax_id() <<
+  " have valid entity label\n";
+
+  std::cout << entity_labels.second << " out of " << entity_labels.first << " have more than one entity label\n";
 
   if (nodes.getMax_id() != edges.getMax_id()) {
     std::cerr << "Warning: #Node does not match in NodeList (" << nodes.getMax_id() << ")"
