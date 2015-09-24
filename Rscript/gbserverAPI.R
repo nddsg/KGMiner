@@ -25,11 +25,39 @@ pcrw <- function(src, dst, metapath) {
   return(as.numeric(request(command)))
 }
 
-heter_path <- function(id1, id2, discard_rel, max_depth = 3) {
+meta_path <- function(id1, id2, discard_rel, max_depth = 3) {
+  command <- paste("metapath", id1, id2, discard_rel, max_depth, "F", "F", sep=" ")
+  paths <- request(command)
+  return(unlist(str_split(paths[-1], "\n")))
+}
+
+heter_path <- function(id1, id2, discard_rel, max_depth = 3, .raw = F) {
   command <- paste("hpath", id1, id2, discard_rel, max_depth, "F", "F", sep=" ")
   
   paths <- request(command)
-  return(lapply(unlist(str_split(paths[-1], "\n")), hpath_parser))
+  if (!.raw) {
+    return(lapply(unlist(str_split(paths[-1], "\n")), hpath_parser))
+  } else {
+    return(unlist(str_split(paths[-1],"\\n")))
+  }
+}
+
+heter_node_path <- function(id1, id2, discard_rel, max_depth = 3) {
+  res <- heter_path(id1, id2, discard_rel, max_depth)
+  
+  res <- lapply(res, function(x){
+    return(paste(x$nodes, collapse = ","))
+  })
+  
+  res <- as.data.frame(table(unlist(res)))
+  
+  return(res[order(-res$Freq),])
+}
+
+heter_full_path <- function(id1, id2, discard_rel, max_depth = 3) {
+  res <- meta_path(id1, id2, discard_rel, max_depth)
+  res <- as.data.frame(table(res))
+  return(res[order(-res$Freq),])
 }
 
 get_path_by_rel <- function(id1, id2, discard_rel, max_depth = 3, target_path=NULL) {
@@ -46,7 +74,7 @@ get_path_by_rel <- function(id1, id2, discard_rel, max_depth = 3, target_path=NU
   return(tmp_res[!sapply(tmp_res, is.null)])
 }
 
-rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapfile = NA, .raw=F) {
+rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapfile = NA, .raw=F, .discard_direction = F) {
   library(utils)
   library(stringr)
   
@@ -82,7 +110,7 @@ rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapf
           return(paste(ifelse(x < 0, "(-1)", "-"), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
-    } else {
+    } else if (.discard_direction) {
       paths$paths <- unlist(lapply(as.character(paths$paths), function(x){str_replace_all(x,"-","")}))
     }
     
@@ -96,7 +124,7 @@ rel_path <- function(id1, id2, max_depth = 3, is_directed = F, discard_rel, mapf
           return(paste(ifelse(x < 0, "(-1)", "-"), mapfile[which(mapfile$V1 == abs(x)), "V2"], sep=""))
         })), collapse=",")
       }))
-    } else {
+    } else if(.discard_direction) {
       paths$paths <- unlist(lapply(as.character(paths$paths), function(x){str_replace_all(x,"-","")}))
     }
     return(paths)

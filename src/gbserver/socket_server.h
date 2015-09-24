@@ -378,6 +378,8 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
         }
       }
       return_string = oss.str();
+    } else if (commands.at(0) == "nontology") {
+      return_string = std::to_string(g.get_nontology());
     } else {
       return_string = "Unsupported command\n";
     }

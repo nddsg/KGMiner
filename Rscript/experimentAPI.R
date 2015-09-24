@@ -19,7 +19,10 @@ eval.df <- function(df) {
 ## Basic experiment helper
 eval.helper <- function(df, discard_rel, gen_func) {
   res <- list()
+  ptm <- proc.time()
   res[["raw"]] <- gen_func(df, discard_rel)
+  write.csv(colnames(res[["raw"]]), "/data/bshi/dbpedia/gngm_celf.fullpath.csv")
+  res[["elapsed"]] <- proc.time() - ptm
   res[["model"]] <- Logistic(label~.,res[["raw"]])
   res[["eval"]] <- evaluate_Weka_classifier(res[["model"]], numFolds = 10, complexity = T, class = T, seed = 233)
   return(res)
@@ -108,11 +111,30 @@ eval.amie <- function(df, associated_rel) {
   return(eval.helper(df, associated_rel, func.amie))
 }
 
-## Test method
-eval.test <- function(df, discard_rel) {
+## Test method with entire path
+eval.fullpath.test <- function(df, discard_rel, max_depth = 3) {
   func.test <- function(df, discard_rel) {
     tmp.paths <- rbind.fill(parApply(cl, dat, 1, function(x) {
-      tmp_paths <- rel_path(as.numeric(x[1]), as.numeric(x[2]), 3,F, DISCARD_REL)
+      tmp_paths <- heter_full_path(as.numeric(x[1]), as.numeric(x[2]), DISCARD_REL, max_depth)
+      if(length(tmp_paths) == 0) {
+        return(data.frame(label = as.logical(x[3])))
+      }
+      rtn <- as.data.frame(t(tmp_paths$Freq))
+      colnames(rtn) <- tmp_paths$res
+      rtn <- cbind(label = as.logical(x[3]), rtn)
+      return(rtn)
+    }))
+    tmp.paths[is.na(tmp.paths)] <- 0
+    return(tmp.paths)
+  }
+  return(eval.helper(df, discard_rel, func.test))
+}
+
+## Test method
+eval.test <- function(df, discard_rel, max_depth = 3) {
+  func.test <- function(df, discard_rel) {
+    tmp.paths <- rbind.fill(parApply(cl, dat, 1, function(x) {
+      tmp_paths <- rel_path(as.numeric(x[1]), as.numeric(x[2]), max_depth, F, DISCARD_REL)
       if(length(tmp_paths) == 0) {
         return(data.frame(label = as.logical(x[3])))
       }
