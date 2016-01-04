@@ -32,7 +32,11 @@ bool is_false(const std::string &str) {
 void worker(local::stream_protocol::socket *socket, graph<std::string, std::string> &g) {
   boost::array<char, 1024> buf;
   boost::system::error_code error;
-  size_t len = boost::asio::read(*socket, boost::asio::buffer(buf), error);
+  size_t len = 0;
+  while(1) {
+    len += boost::asio::read(*socket, boost::asio::buffer(buf.begin() + len, 1024 - len), error);
+    if (buf[len] == '\0') break;
+  }
 
   std::vector<std::string> commands;
   std::stringbuf strbuf;
