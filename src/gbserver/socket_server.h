@@ -34,7 +34,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   boost::system::error_code error;
   size_t len = 0;
   while(1) {
-    len += boost::asio::read(*socket, boost::asio::buffer(buf.begin() + len, 1024 - len), error);
+    len += socket->read_some(boost::asio::buffer(buf.begin() + len, 1024 - len), error);
     if (buf[len] == '\0') break;
   }
 
