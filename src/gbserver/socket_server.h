@@ -35,6 +35,7 @@ void worker(local::stream_protocol::socket *socket, graph<std::string, std::stri
   size_t len = 0;
   while(1) {
     len += socket->read_some(boost::asio::buffer(buf.begin() + len, 1024 - len), error);
+    if (error != 0) break;
     if (buf[len] == '\0') break;
   }
 
