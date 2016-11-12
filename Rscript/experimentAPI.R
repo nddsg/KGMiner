@@ -21,7 +21,7 @@ eval.helper <- function(df, discard_rel, gen_func) {
   res <- list()
   ptm <- proc.time()
   res[["raw"]] <- gen_func(df, discard_rel)
-  write.csv(colnames(res[["raw"]]), "/data/bshi/dbpedia/gngm_celf.fullpath.csv")
+  # write.csv(colnames(res[["raw"]]), "/data/bshi/dbpedia/gngm_celf.fullpath.csv")
   res[["elapsed"]] <- proc.time() - ptm
   res[["model"]] <- Logistic(label~.,res[["raw"]])
   res[["eval"]] <- evaluate_Weka_classifier(res[["model"]], numFolds = 10, complexity = T, class = T, seed = 233)
