@@ -45,6 +45,8 @@ write.csv(experiment.aa$raw, "../result/city/city_capital_all.aa.csv", row.names
 elapsed.time <- rbind(elapsed.time, data.frame(method="aa", 
                                                elapsed = experiment.aa$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
+print(experiment.aa$eval)
+
 ## Semantic Proximity
 
 experiment.sp <- eval.sp(dat, DISCARD_REL)
@@ -53,6 +55,7 @@ write.csv(experiment.sp$raw, "../result/city/city_capital_all.sp.csv", row.names
 elapsed.time <- rbind(elapsed.time, data.frame(method="sp", 
                                                elapsed = experiment.sp$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
+print(experiment.sp$eval)
 
 
 ## Personalized PageRank
@@ -63,6 +66,8 @@ write.csv(experiment.ppr$raw, "../result/city/city_capital_all.ppr.csv", row.nam
 elapsed.time <- rbind(elapsed.time, data.frame(method="ppr", 
                                                elapsed = experiment.ppr$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
+print(experiment.ppr$eval)
+
 ## Preferential Attachment
 
 experiment.pa <- eval.pa(dat, DISCARD_REL)
@@ -70,6 +75,8 @@ write.csv(experiment.pa$raw, "../result/city/city_capital_all.pa.csv", row.names
 
 elapsed.time <- rbind(elapsed.time, data.frame(method="pa", 
                                                elapsed = experiment.pa$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
+
+print(experiment.pa$eval)
 
 ## Katz
 
@@ -79,6 +86,8 @@ write.csv(experiment.katz$raw, "../result/city/city_capital_all.katz.csv", row.n
 elapsed.time <- rbind(elapsed.time, data.frame(method="katz", 
                                                elapsed = experiment.katz$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
+print(experiment.katz$eval)
+
 ## AMIE
 
 experiment.amie <- eval.amie(dat, ASSOCIATE_REL)
@@ -86,6 +95,8 @@ write.csv(experiment.amie$raw, "../result/city/city_capital_all.amie.csv", row.n
 
 elapsed.time <- rbind(elapsed.time, data.frame(method="amie", 
                                                elapsed = experiment.amie$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
+
+print(experiment.amie$eval)
 
 
 
@@ -105,6 +116,8 @@ write.csv(experiment.test$raw, "../result/city/city_capital_all.test.csv", row.n
 elapsed.time <- rbind(elapsed.time, data.frame(method="test", 
                                                elapsed = experiment.test$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
+print(experiment.test$eval)
+
 
 
 experiment.pcrwamie <- eval.pcrw(dat, c(404))
@@ -114,6 +127,8 @@ elapsed.time <- rbind(elapsed.time, data.frame(method="pcrw",
                                                elapsed = experiment.pcrwamie$elapsed[3] * CLUSTER_SIZE / nrow(dat)));
 
 write.csv(elapsed.time, "../result/city/city_capital_all.elapsed.csv", row.names=F)
+
+print(experiment.pcrwamie$eval)
 
 stopCluster(cl)
 
