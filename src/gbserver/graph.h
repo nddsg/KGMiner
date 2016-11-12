@@ -17,7 +17,8 @@
 #include <cmath>
 
 template<typename ND, typename TD>
-class graph {
+class graph
+{
 
   typedef ND node_type;
   typedef TD edge_type;
@@ -26,14 +27,16 @@ class graph {
   std::shared_ptr<edge_loader> edges_ptr;
   std::shared_ptr<type_loader<edge_type> > edgetypes_ptr;
 
-  inline void is_node_valid(unsigned int id) {
+  inline void is_node_valid(unsigned int id)
+  {
     if (!nodes_ptr->exists(id)) {
       throw std::runtime_error("Nodes " + std::to_string(id) + " does not exist.");
     }
   }
 
   inline bool is_loop(std::vector<std::pair<unsigned int, unsigned int> > &path, unsigned int id) noexcept {
-    for (auto it = path.cbegin(); it != path.cend(); ++it) {
+    for (auto it = path.cbegin(); it != path.cend(); ++it)
+    {
       if (it->first == id) return true;
     }
     return false;
@@ -45,7 +48,8 @@ class graph {
    */
   void dfs_helper(unsigned int src, unsigned int dst, unsigned int discard_rel, unsigned max_depth,
                   std::vector<unsigned int> &tmp_path, std::set<unsigned int> &visited,
-                  std::vector<std::vector<unsigned int> > &result, bool is_directed, bool depth_only, unsigned depth) {
+                  std::vector<std::vector<unsigned int> > &result, bool is_directed, bool depth_only, unsigned depth)
+  {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back() == dst) {
       if (!depth_only || (depth_only && tmp_path.size() == max_depth)) {
         result.push_back(tmp_path);
@@ -104,7 +108,8 @@ class graph {
                   std::vector<std::pair<unsigned int, unsigned int> > &tmp_path, std::vector<bool> &reverted_rel,
                   std::set<unsigned int> &visited,
                   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > &result,
-                  std::vector<std::vector<bool> > &rel_result, bool is_directed, unsigned depth) {
+                  std::vector<std::vector<bool> > &rel_result, bool is_directed, unsigned depth)
+  {
     if (tmp_path.size() > 0 && tmp_path.size() <= max_depth && tmp_path.back().first == dst) {
       result.push_back(tmp_path);
       rel_result.push_back(reverted_rel);
@@ -155,23 +160,26 @@ public:
   graph() : nodes_ptr(nullptr), edges_ptr(nullptr), edgetypes_ptr(nullptr) { };
 
   graph(node_loader<node_type> &nodes, edge_loader &edges, type_loader<edge_type> &edgetypes) :
-      nodes_ptr(&nodes),
-      edges_ptr(&edges),
-      edgetypes_ptr(&edgetypes) { };
+    nodes_ptr(&nodes),
+    edges_ptr(&edges),
+    edgetypes_ptr(&edgetypes) { };
 
-  const std::set<unsigned int> &get_out_edges(unsigned src) {
+  const std::set<unsigned int> &get_out_edges(unsigned src)
+  {
     is_node_valid(src);
     return edges_ptr->get_edges(src).get_out_neighbors();
 
   }
 
-  const std::set<unsigned int> &get_in_edges(unsigned src) {
+  const std::set<unsigned int> &get_in_edges(unsigned src)
+  {
     is_node_valid(src);
     return edges_ptr->get_edges(src).get_in_neighbors();
   }
 
   std::vector<std::vector<unsigned int> > homogeneous_dfs(unsigned int src, unsigned int dst, unsigned int discard_rel,
-                                                          unsigned int depth, bool depth_only, bool is_directed) {
+      unsigned int depth, bool depth_only, bool is_directed)
+  {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -193,7 +201,8 @@ public:
   };
 
   std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > > heterogeneous_dfs(
-      unsigned int src, unsigned int dst, unsigned int discard_rel, bool is_directed, unsigned int depth) {
+    unsigned int src, unsigned int dst, unsigned int discard_rel, bool is_directed, unsigned int depth)
+  {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -215,14 +224,16 @@ public:
     assert(path_result.size() == rel_result.size());
 
     return std::pair<std::vector<std::vector<std::pair<unsigned int, unsigned int> > >, std::vector<std::vector<bool> > >(
-        path_result, rel_result);
+             path_result, rel_result);
   }
 
-  node_type get_node_type(unsigned int id) {
+  node_type get_node_type(unsigned int id)
+  {
     return nodes_ptr->get_value(id);
   }
 
-  edge_type get_edge_type(unsigned int id) {
+  edge_type get_edge_type(unsigned int id)
+  {
     return edgetypes_ptr->get_value(id);
   }
 
@@ -230,7 +241,8 @@ public:
    * [1]	L. A. Adamic and E. Adar,
    *      “Friends and neighbors on the Web,” Social Networks, vol. 25, no. 3, pp. 211–230, Jul. 2003.
    */
-  double adamic_adar(unsigned int id1, unsigned id2, unsigned int discard_rel = 0) {
+  double adamic_adar(unsigned int id1, unsigned id2, unsigned int discard_rel = 0)
+  {
     is_node_valid(id1);
     is_node_valid(id2);
 
@@ -250,7 +262,8 @@ public:
    * [1]	G. L. Ciampaglia, P. Shiralkar, L. M. Rocha, J. Bollen, F. Menczer, and A. Flammini,
    *      “Computational fact checking from knowledge networks,” Physical review E, vol. cs.CY. 14-Jan-2015.
    */
-  double semantic_proximity(unsigned int src, unsigned dst, unsigned int discard_rel = 0) {
+  double semantic_proximity(unsigned int src, unsigned dst, unsigned int discard_rel = 0)
+  {
     std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(src, dst, discard_rel, 3, false, false);
     // Remove direct connected link
     auto it = paths.begin();
@@ -279,7 +292,8 @@ public:
    *
    * Multidimensional Adamic Adar * Edge Dimension Connectivity
    */
-  double multidimensional_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type) {
+  double multidimensional_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type)
+  {
     is_node_valid(id1);
     is_node_valid(id2);
 
@@ -301,12 +315,13 @@ public:
    * sum(#Rel / #Edges)
    *
    */
-  double heter_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type) {
+  double heter_adamic_adar(unsigned int id1, unsigned int id2, unsigned int rel_type)
+  {
     is_node_valid(id1);
     is_node_valid(id2);
 
     std::vector<std::pair<unsigned int, unsigned int> > common_neighbors = edges_ptr->get_common_neighbor_except_rel(
-        id1, id2, rel_type, false);
+          id1, id2, rel_type, false);
 
     double result = 0.0;
 
@@ -330,7 +345,8 @@ public:
    *      which have 600^l different paths. Hence we generate paths based on starting point
    */
   double path_constrained_random_walk(unsigned int src, unsigned int dst, std::vector<unsigned int> metapath,
-                                      bool is_directed = true) {
+                                      bool is_directed = true)
+  {
 
     is_node_valid(src);
     is_node_valid(dst);
@@ -357,7 +373,7 @@ public:
         for (auto prev = back_edges.cbegin(); prev != back_edges.cend(); ++prev) {
           if (prev->second == *it) {
             score[i] +=
-                score[prev->first] / double(rel_count[prev->first]);
+              score[prev->first] / double(rel_count[prev->first]);
           }
         }
       }
@@ -375,10 +391,13 @@ public:
    * TODO: May change to long double for more precise score.
    */
   double personalized_pagerank(unsigned int src, unsigned int dst, unsigned int discard_rel, double delta, int iter,
-                               bool is_directed, double damping) {
+                               bool is_directed, double damping)
+  {
 
     is_node_valid(src);
     is_node_valid(dst);
+
+    std::cout << src <<", and " << dst << " are valid nodes\n";
 
     std::vector<double> ppr_score(nodes_ptr->getMax_id() + 1, 0.0);
     std::vector<double> old_score(nodes_ptr->getMax_id() + 1, 0.0);
@@ -391,13 +410,14 @@ public:
     while (cnt < iter) { // run at most *iter* iterations
       double changes = 0.0;
 
-      for (int i = 0; i < nodes_ptr->getMax_id() + 1; i++) {
+      for (int i = 0; i < nodes_ptr->getMax_id(); i++) {
         // get score by adding up all neighbors
 
         std::set<uint> neighbors;
 
         const std::set<std::pair<uint, uint> > &in_neighbors = edges_ptr->get_edges(
-            i).get_backward(); // all in-coming edges
+              i).get_backward(); // all in-coming edges
+
 
         for (auto it = in_neighbors.cbegin(); it != in_neighbors.cend(); ++it) {
           if (it->second != discard_rel) neighbors.insert(it->first);
@@ -405,7 +425,8 @@ public:
 
         if (!is_directed) {
           const std::set<std::pair<uint, uint> > &out_neighbors = edges_ptr->get_edges(
-              i).get_forward(); // all out-going edges
+                i).get_forward(); // all out-going edges
+
           for (auto it = out_neighbors.cbegin(); it != out_neighbors.cend(); ++it) {
             if (it->second != discard_rel) neighbors.insert(it->first);
           }
@@ -440,7 +461,8 @@ public:
    * “Evolution of the social network of scientific collaborations,” Physical review E, vol. cond-mat.soft. 09-Apr-2001.
    *
    */
-  double preferential_attachment(unsigned int id1, unsigned int id2) {
+  double preferential_attachment(unsigned int id1, unsigned int id2)
+  {
     is_node_valid(id1);
     is_node_valid(id2);
     return edges_ptr->get_edges(id1).get_deg() * edges_ptr->get_edges(id2).get_deg();
@@ -455,12 +477,13 @@ public:
    * CIKM, pp. 556–559, 2003.
    */
   double katz(unsigned int id1, unsigned int id2, unsigned int discard_rel, unsigned int max_length = 3,
-              double beta = 0.05) {
+              double beta = 0.05)
+  {
     is_node_valid(id1);
     is_node_valid(id2);
     double score = 0;
     for (int i = 3; i <=
-                    max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
+         max_length; i++) { // we do not start with 1 or 2 because 1 does not have any paths and 2 means directly connected edges
       std::vector<std::vector<unsigned int> > paths = homogeneous_dfs(id1, id2, discard_rel, max_length, true, false);
       double tmp_score = double(paths.size());
       for (int j = 0; j < i; j++) {
@@ -471,28 +494,33 @@ public:
     return score;
   }
 
-  inline std::vector<unsigned int> get_ontology(unsigned int id) {
+  inline std::vector<unsigned int> get_ontology(unsigned int id)
+  {
     is_node_valid(id);
     return edges_ptr->get_ontology(id);
   }
 
-  inline std::vector<std::pair<unsigned int, std::set<unsigned int> > > get_ontology_siblings(unsigned int id) {
+  inline std::vector<std::pair<unsigned int, std::set<unsigned int> > > get_ontology_siblings(unsigned int id)
+  {
     is_node_valid(id);
     return edges_ptr->get_ontology_siblings(id);
   }
 
-  inline std::set<unsigned int> get_ontology_siblings(unsigned int id, double tol) {
+  inline std::set<unsigned int> get_ontology_siblings(unsigned int id, double tol)
+  {
     is_node_valid(id);
     return edges_ptr->get_ontology_siblings(id, tol);
   }
 
-  inline std::vector<std::pair<unsigned int, unsigned int> > get_ontology_sibling_count(unsigned int id) {
+  inline std::vector<std::pair<unsigned int, unsigned int> > get_ontology_sibling_count(unsigned int id)
+  {
     is_node_valid(id);
     return edges_ptr->get_ontology_sibling_count(id);
   }
 
   bool connected_by_helper(unsigned int src, unsigned int dst, unsigned int pos, std::vector<unsigned int> &link_type,
-                           bool is_directed) {
+                           bool is_directed)
+  {
     edge_list &edges = edges_ptr->get_edges(src);
 
     for (auto it = edges.get_forward().cbegin(); it != edges.get_forward().cend(); ++it) {
@@ -528,7 +556,8 @@ public:
     return false;
   }
 
-  bool connected_by(unsigned int src, unsigned int dst, std::vector<unsigned int> link_type, bool is_directed = false) {
+  bool connected_by(unsigned int src, unsigned int dst, std::vector<unsigned int> link_type, bool is_directed = false)
+  {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -536,7 +565,8 @@ public:
 
   }
 
-  bool connected_by(unsigned int src, unsigned int dst, unsigned int link_type, bool is_directed = false) {
+  bool connected_by(unsigned int src, unsigned int dst, unsigned int link_type, bool is_directed = false)
+  {
     is_node_valid(src);
     is_node_valid(dst);
 
@@ -557,7 +587,8 @@ public:
 
   //TODO: This function iterates through entire edge list to find qualified entity pairs, try cache this
   std::vector<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_rel(unsigned int rel_type,
-                                                                               double sample_rate = 0.1) {
+      double sample_rate = 0.1)
+  {
 
     srand(233);
 
@@ -575,22 +606,25 @@ public:
   }
 
   inline std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple(unsigned int src, unsigned int dst,
-                                                                                     unsigned int rel_type,
-                                                                                     double sample_rate = 0.1) {
+      unsigned int rel_type,
+      double sample_rate = 0.1)
+  {
     return get_entity_pairs_by_triple_helper(src, dst, rel_type, sample_rate, false);
   }
 
   inline std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_without_rel(unsigned int src,
-                                                                                       unsigned int dst,
-                                                                                       unsigned int rel_type,
-                                                                                       double sample_rate = 0.1) {
+      unsigned int dst,
+      unsigned int rel_type,
+      double sample_rate = 0.1)
+  {
     return get_entity_pairs_by_triple_helper(src, dst, rel_type, sample_rate, true);
   }
 
   std::set<std::pair<unsigned int, unsigned int> > get_entity_pairs_by_triple_helper(unsigned int src, unsigned int dst,
-                                                                                 unsigned int rel_type,
-                                                                                     double sample_rate = 0.1,
-                                                                                     bool exclude_rel = false) {
+      unsigned int rel_type,
+      double sample_rate = 0.1,
+      bool exclude_rel = false)
+  {
     is_node_valid(src);
     is_node_valid(dst);
     srand(233);
@@ -649,11 +683,13 @@ public:
 
   }
 
-  inline unsigned int get_edge_type_count(unsigned int rel_type) {
+  inline unsigned int get_edge_type_count(unsigned int rel_type)
+  {
     return edges_ptr->get_edge_type_count(rel_type);
   }
 
-  std::set<unsigned int> get_neighbor_by_rel(unsigned int src, unsigned int rel_type, bool is_directed = false) {
+  std::set<unsigned int> get_neighbor_by_rel(unsigned int src, unsigned int rel_type, bool is_directed = false)
+  {
     is_node_valid(src);
 
     edge_list &edges = edges_ptr->get_edges(src);
@@ -678,8 +714,12 @@ public:
 
   }
 
-    unsigned int get_nontology() { return edges_ptr->get_nontology(); }
+  unsigned int get_nontology()
+  {
+    return edges_ptr->get_nontology();
+  }
 
 };
 
 #endif //GBPEDIA_GRAPH_H
+

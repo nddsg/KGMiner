@@ -36,7 +36,7 @@ public:
     char sep;
 
     while(!fin.eof()) {
-      fin >> src >> sep >> dst >> sep >> rel;
+      fin >> src >> dst >> rel;
 
       if (std::max(src, dst) >= edge_map.size()) { /* Enlarge edge_map so it can contain certain number of nodes */
         edge_map.resize(std::max(src, dst) + 1u, edge_list());
