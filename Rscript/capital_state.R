@@ -25,7 +25,7 @@ mapfile$V2 <- as.character(mapfile$V2)
 # ---- Init workers ----
 
 cl <- makeCluster(CLUSTER_SIZE) 
-clusterExport(cl = cl, varlist=c("adamic_adar", "semantic_proximity", "ppagerank", "heter_path", "max_depth",
+clusterExport(cl = cl, varlist=c("adamic_adar", "semantic_proximity", "ppagerank", "heter_path", # "max_depth",
                                  "preferential_attachment", "katz", "pcrw", "heter_full_path", "meta_path",
                                  "multidimensional_adamic_adar", "heterogeneous_adamic_adar",
                                  "connectedby", "rel_path", "truelabeled", "falselabeled", "str_split",
