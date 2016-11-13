@@ -4,4 +4,4 @@ cd ./Rscript
 
 mkdir -p ../result/city
 
-Rscript --verbose city_capital.R
+Rscript --verbose capital_state.R 

@@ -15,6 +15,7 @@ CLUSTER_SIZE = 48 # Number of workers in gbserver
 FALSE_PER_TRUE = 5
 DISCARD_REL = 191
 ASSOCIATE_REL = c(404)
+max_depth = 3
 
 # ---- Load edge type file ----
 
@@ -25,7 +26,7 @@ mapfile$V2 <- as.character(mapfile$V2)
 # ---- Init workers ----
 
 cl <- makeCluster(CLUSTER_SIZE) 
-clusterExport(cl = cl, varlist=c("adamic_adar", "semantic_proximity", "ppagerank", "heter_path", # "max_depth",
+clusterExport(cl = cl, varlist=c("adamic_adar", "semantic_proximity", "ppagerank", "heter_path",  "max_depth",
                                  "preferential_attachment", "katz", "pcrw", "heter_full_path", "meta_path",
                                  "multidimensional_adamic_adar", "heterogeneous_adamic_adar",
                                  "connectedby", "rel_path", "truelabeled", "falselabeled", "str_split",
@@ -58,6 +59,27 @@ colnames(dat.true) <- c("src","dst","label")
 dat <- rbind(dat.true, dat.false)
 
 elapsed.time <- data.frame()
+
+## Test Method
+
+experiment.fullpath.test <- eval.fullpath.test(dat, DISCARD_REL)
+write.csv(experiment.fullpath.test$raw, "../result/city/capital_state_all.fullpath.test.csv", row.names=F)
+
+print("FULL PATH")
+print(experiment.fullpath.test$eval)
+
+elapsed.time <- rbind(elapsed.time, data.frame(method="fullpath.test", 
+                                               elapsed = experiment.fullpath.test$elapsed[3] * CLUSTER_SIZE / nrow(dat)))
+
+experiment.test <- eval.test(dat, DISCARD_REL)
+write.csv(experiment.test$raw, "../result/city/capital_state_all.test.csv", row.names=F)
+print("PREDICATE PATH")
+print(experiment.test$eval)
+
+elapsed.time <- rbind(elapsed.time, data.frame(method="test", 
+                                               elapsed = experiment.test$elapsed[3] * CLUSTER_SIZE / nrow(dat)))
+
+q()
 
 ## Adamic Adar
 
@@ -112,19 +134,6 @@ write.csv(experiment.amie$raw, "../result/city/capital_state_all.amie.csv", row.
 elapsed.time <- rbind(elapsed.time, data.frame(method="amie", 
                                                elapsed = experiment.amie$elapsed[3] * CLUSTER_SIZE / nrow(dat)))
 
-## Test Method
-
-experiment.fullpath.test <- eval.fullpath.test(dat, DISCARD_REL)
-write.csv(experiment.fullpath.test$raw, "../result/city/capital_state_all.fullpath.test.csv", row.names=F)
-
-elapsed.time <- rbind(elapsed.time, data.frame(method="fullpath.test", 
-                                               elapsed = experiment.fullpath.test$elapsed[3] * CLUSTER_SIZE / nrow(dat)))
-
-experiment.test <- eval.test(dat, DISCARD_REL)
-write.csv(experiment.test$raw, "../result/city/capital_state_all.test.csv", row.names=F)
-
-elapsed.time <- rbind(elapsed.time, data.frame(method="test", 
-                                               elapsed = experiment.test$elapsed[3] * CLUSTER_SIZE / nrow(dat)))
 
 experiment.pcrwamie <- eval.pcrw(dat, c(404))
 write.csv(experiment.pcrwamie$raw, "../result/city/capital_state_all.pcrwamie.csv", row.names=F)

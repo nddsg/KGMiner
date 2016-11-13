@@ -364,11 +364,11 @@ public:
     // for path length >= 1, calculate scores.
 
     for (auto it = metapath.cbegin(); it != metapath.cend(); ++it) {
-      for (unsigned int i = 0; i < nodes_ptr->getMax_id(); i++) {
+      for (unsigned int i = 0; i <= nodes_ptr->getMax_id(); i++) {
         rel_count[i] = edges_ptr->get_neighbor_count_by_rel(i, *it, is_directed);
       }
       // calculate scores
-      for (unsigned int i = 0; i < nodes_ptr->getMax_id(); i++) {
+      for (unsigned int i = 0; i <= nodes_ptr->getMax_id(); i++) {
         auto back_edges = edges_ptr->get_edges(i).get_backward();
         for (auto prev = back_edges.cbegin(); prev != back_edges.cend(); ++prev) {
           if (prev->second == *it) {
@@ -410,7 +410,7 @@ public:
     while (cnt < iter) { // run at most *iter* iterations
       double changes = 0.0;
 
-      for (int i = 0; i < nodes_ptr->getMax_id(); i++) {
+      for (int i = 0; i <= nodes_ptr->getMax_id(); i++) {
         // get score by adding up all neighbors
 
         std::set<uint> neighbors;
