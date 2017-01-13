@@ -7,7 +7,7 @@ make gbserver -j4
 echo "Download infobox and facts..."
 if [ ! -f ./data.zip ] 
 	then
-	wget "https://www.dropbox.com/s/xa55p0clno4k2l0/data.zip?dl=1" -O data.zip
+	wget "https://www.dropbox.com/s/yqlom6t5ehze0uq/data.zip?dl=1" -O data.zip
 	fi
 if [ ! -f ./facts.zip ] 
 	then
