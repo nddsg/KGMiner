@@ -1,3 +1,9 @@
+Code for paper 
+
+Discriminative predicate path mining for fact checking in knowledge graphs, B Shi, T Weninger, Knowledge-Based Systems 104, 123-133, 2016
+
+https://arxiv.org/pdf/1510.05911.pdf
+
 ```bash
 git clone https://github.com/nddsg/KGMiner.git
 cd KGMiner/.
